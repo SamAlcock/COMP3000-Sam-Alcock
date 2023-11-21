@@ -8,7 +8,7 @@ public class TargetPlacing : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        int numTargets = 80;
+        int numTargets = 5;
 
         GameObject target = GameObject.Find("Target");
 
@@ -26,6 +26,7 @@ public class TargetPlacing : MonoBehaviour
            
             Vector3 randomPosition = GetPosition();
             targets.Add(Instantiate(target, randomPosition, Quaternion.identity));
+            targets[i].tag = "Target";
 
             while (InBadPosition(randomPosition))
             {
