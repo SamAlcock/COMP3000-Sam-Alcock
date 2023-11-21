@@ -13,7 +13,6 @@ public class TargetCollision : MonoBehaviour
         if (collision.gameObject.CompareTag("Obstacle") || collision.gameObject.CompareTag("InaccessibleState")) // if collision with obstacle or inaccessible state
         {
             badPosition = true;
-            Debug.Log("Collision");
         }
 
 
