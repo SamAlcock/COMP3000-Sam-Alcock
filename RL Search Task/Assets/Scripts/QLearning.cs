@@ -30,15 +30,15 @@ public class QLearning : MonoBehaviour
 
     Vector3[,] GenerateStateGrid(GameObject statePoint, GameObject positiveMarker, GameObject negativeMarker)
     {
-        Debug.Log("Generating state grid for Q-Learning");
+
 
         // Calculate size of area using corner markers
         float widthX = positiveMarker.transform.position.x - negativeMarker.transform.position.x;
         float widthZ = positiveMarker.transform.position.z - negativeMarker.transform.position.z;
 
         // Gap between grid points - decrease gap to increase point density
-        float xGap = 0.5f;
-        float zGap = 0.5f;
+        float xGap = 0.2f;
+        float zGap = 0.2f;
 
         // Calculate how many state points can fit between both corner markers using the defined gaps
         int elementsX = Convert.ToInt32(widthX / xGap);
@@ -76,14 +76,6 @@ public class QLearning : MonoBehaviour
                 stateObjects.Add(Instantiate(statePoint, grid[x, z], Quaternion.identity));
             }
 
-        }
-
-        foreach (GameObject state in stateObjects)
-        {
-            if (state.tag == "InaccessibleState")
-            {
-                
-            }
         }
     }
 

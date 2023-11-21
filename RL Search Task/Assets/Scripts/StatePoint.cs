@@ -4,16 +4,19 @@ using UnityEngine;
 
 public class StatePoint : MonoBehaviour
 {
-    // Start is called before the first frame update
     private void OnCollisionEnter(Collision collision)
     {
+        MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
         if (collision.gameObject.CompareTag("Obstacle"))
         {
-            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
             meshRenderer.material.color = Color.grey;
             gameObject.tag = "InaccessibleState";
         }
-       
+        else if (collision.gameObject.CompareTag("Target"))
+        {
+            meshRenderer.material.color = Color.yellow;
+            gameObject.tag = "RewardState";
+        }
     }
 
 }
