@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Timeline;
+using UnityEngine.UIElements;
 
 public class QLearning : MonoBehaviour
 {
@@ -60,7 +61,9 @@ public class QLearning : MonoBehaviour
 
         GameObject[,] stateObjects = CreateStates(grid, statePoint);
         PickSpawnPoint(stateObjects);
+        stateObjects = TagStates(stateObjects);
         GetRewardMatrix(grid, stateObjects);
+        
 
         return grid;
 
@@ -106,6 +109,34 @@ public class QLearning : MonoBehaviour
         }
     }
 
+    GameObject[,] TagStates(GameObject[,] stateObjects)
+    {
+        Collider[] collisions;
+
+        for (int i = 0; i < stateObjects.GetLength(0); i++)
+        {
+            for (int j = 0; j < stateObjects.GetLength(1); j++)
+            {
+                collisions = Physics.OverlapSphere(stateObjects[i,j].transform.position, 0.2f);
+
+                foreach (Collider collision in collisions)
+                {
+
+                    if (collision.CompareTag("Obstacle"))
+                    {
+                        stateObjects[i, j].tag = "InaccessibleState";
+                    }
+                    else if (collision.CompareTag("Target"))
+                    {
+                        stateObjects[i, j].tag = "RewardState";
+                    }
+                }
+            }
+        }
+
+        return stateObjects;
+    }
+
     int[,] GetRewardMatrix(Vector3[,] grid, GameObject[,] stateObjects)
     {
         int[,] rewardMatrix = new int[grid.GetLength(0), grid.GetLength(1)];
@@ -114,7 +145,6 @@ public class QLearning : MonoBehaviour
         {
             for (int j = 0; j < grid.GetLength(1); j++)
             {
-                Debug.Log(stateObjects[i, j].tag);
                 if (stateObjects[i, j].CompareTag("EmptyState"))
                 {
                     rewardMatrix[i, j] = -1;
@@ -122,19 +152,15 @@ public class QLearning : MonoBehaviour
                 else if (stateObjects[i, j].CompareTag("InaccessibleState"))
                 {
                     rewardMatrix[i, j] = -50;
-                    Debug.Log(rewardMatrix[i, j]);
                 }
                 else if (stateObjects[i, j].CompareTag("RewardState"))
                 {
                     rewardMatrix[i, j] = 50;
-                    Debug.Log(rewardMatrix[i, j]);
                 }
                 else
                 {
                     rewardMatrix[i, j] = 0;
-                    Debug.Log(rewardMatrix[i, j]);
                 }
-                
             }
         }
 
