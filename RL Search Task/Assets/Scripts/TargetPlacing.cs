@@ -39,7 +39,6 @@ public class TargetPlacing : MonoBehaviour
     }
     bool InBadPosition(Vector3 position)
     {
-        Debug.Log("position = " + position);
         Collider[] collisions = Physics.OverlapSphere(position, 0.2f);
         foreach(Collider collision in collisions)
         {

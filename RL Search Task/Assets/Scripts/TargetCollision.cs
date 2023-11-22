@@ -15,7 +15,7 @@ public class TargetCollision : MonoBehaviour
             badPosition = true;
         }
 
-
+        
     }
     private void OnCollisionExit(Collision collision)
     {
