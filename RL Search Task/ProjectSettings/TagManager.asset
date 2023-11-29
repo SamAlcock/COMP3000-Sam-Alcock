@@ -8,6 +8,9 @@ TagManager:
   - InaccessibleState
   - Target
   - RewardState
+  - StartState
+  - EmptyState
+  - QLAgent
   layers:
   - Default
   - TransparentFX

@@ -12,6 +12,12 @@ public class QLearning : MonoBehaviour
 {
     [SerializeField] bool visualiseStates = false;
 
+    public bool isInitialised = false;
+
+    public int[,] rewards;
+    public Vector3[,] grid;
+    public GameObject[,] stateObjects;
+
     /*
      *   Q-Learning
      *   - Set up a grid in area - each square in grid acts as a state
@@ -27,7 +33,10 @@ public class QLearning : MonoBehaviour
         GameObject positiveMarker = GameObject.Find("Marker ++");
         GameObject negativeMarker = GameObject.Find("Marker --");
 
-        GenerateStateGrid(statePoint, positiveMarker, negativeMarker);  
+        grid = GenerateStateGrid(statePoint, positiveMarker, negativeMarker);
+
+        isInitialised = true;
+
     }
 
     Vector3[,] GenerateStateGrid(GameObject statePoint, GameObject positiveMarker, GameObject negativeMarker)
@@ -46,7 +55,7 @@ public class QLearning : MonoBehaviour
         int elementsX = Convert.ToInt32(widthX / xGap);
         int elementsZ = Convert.ToInt32(widthZ / zGap);
 
-        Vector3[,] grid = new Vector3[elementsX - 1, elementsZ - 1]; // create grid of dimensions elementsX - 1, elementsZ - 1 
+        grid = new Vector3[elementsX - 1, elementsZ - 1]; // create grid of dimensions elementsX - 1, elementsZ - 1 
 
         // Define initial coordinates, with an initial offset of xGap and zGap
         Vector3 initialCoords = new(negativeMarker.transform.position.x + xGap, 0, negativeMarker.transform.position.z + zGap);
@@ -59,10 +68,10 @@ public class QLearning : MonoBehaviour
             }
         }
 
-        GameObject[,] stateObjects = CreateStates(grid, statePoint);
+        stateObjects = CreateStates(grid, statePoint);
         PickSpawnPoint(stateObjects);
         stateObjects = TagStates(stateObjects);
-        GetRewardMatrix(grid, stateObjects);
+        rewards = GetRewardMatrix(grid, stateObjects);
         
 
         return grid;
@@ -117,7 +126,7 @@ public class QLearning : MonoBehaviour
         {
             for (int j = 0; j < stateObjects.GetLength(1); j++)
             {
-                collisions = Physics.OverlapSphere(stateObjects[i,j].transform.position, 0.2f);
+                collisions = Physics.OverlapSphere(stateObjects[i,j].transform.position, 0.05f);
 
                 foreach (Collider collision in collisions)
                 {
@@ -125,6 +134,8 @@ public class QLearning : MonoBehaviour
                     if (collision.CompareTag("Obstacle"))
                     {
                         stateObjects[i, j].tag = "InaccessibleState";
+                        MeshRenderer meshRenderer = stateObjects[i,j].GetComponent<MeshRenderer>();
+                        meshRenderer.material.color = Color.grey;
                     }
                     else if (collision.CompareTag("Target"))
                     {
