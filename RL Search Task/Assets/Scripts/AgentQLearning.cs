@@ -25,10 +25,9 @@ public class AgentQLearning : MonoBehaviour
         GameObject[,] stateObjects = qLearning.stateObjects;
 
         int[] startPosition = GetAgentStartPosition(grid, stateObjects);
-        int[] currPosition = GetCurrentPosition(grid, stateObjects);
         
 
-        TrainAgent(100, startPosition, currPosition, rewardMatrix);
+        TrainAgent(1, startPosition, rewardMatrix, grid);
 
     }
 
@@ -87,74 +86,83 @@ public class AgentQLearning : MonoBehaviour
 
         return currPosition;
     }
-
     List<string> GetValidActions(int[] currPosition, int[,] rewardMatrix)
     {
         List<string> validActions = new();
 
-        if (rewardMatrix[currPosition[0] + 1, currPosition[1]] != -50 && currPosition[0] + 1 < rewardMatrix.GetLength(0))
+        if (currPosition[0] + 1 < rewardMatrix.GetLength(0) && rewardMatrix[currPosition[0] + 1, currPosition[1]] != -50)
         {
             validActions.Add("RIGHT");
         }
-        if (rewardMatrix[currPosition[0] - 1, currPosition[1]] != -50 && currPosition[0] - 1 >= 0)
+        if (currPosition[0] - 1 >= 0 && rewardMatrix[currPosition[0] - 1, currPosition[1]] != -50)
         {
             validActions.Add("LEFT");
         }
-        if (rewardMatrix[currPosition[0], currPosition[1] - 1] != -50 && currPosition[1] - 1 >= 0)
+        if (currPosition[1] - 1 >= 0 && rewardMatrix[currPosition[0], currPosition[1] - 1] != -50)
         {
             validActions.Add("DOWN");
         }
-        if (rewardMatrix[currPosition[0], currPosition[1] + 1] != -50 && currPosition[0] + 1 < rewardMatrix.GetLength(1))
+        if (currPosition[1] + 1 < rewardMatrix.GetLength(1) && rewardMatrix[currPosition[0], currPosition[1] + 1] != -50)
         {
             validActions.Add("UP");
         }
-
+        Debug.Log("Valid actions: " + string.Join(", ", validActions));
         return validActions;
     }
     
-    void TrainAgent(int nIter, int[] startPosition, int[] currPosition, int[,] rewardMatrix)
+    void TrainAgent(int nIter, int[] startPosition, int[,] rewardMatrix, Vector3[,] grid)
     { 
         for (int i = 0; i < nIter; i++) 
         {
             gameObject.transform.position = new Vector3(startPosition[0], 0.2f, startPosition[1]); // Put in start position
-            StartEpisode(startPosition, rewardMatrix);
+            StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid));
         }
     }
 
-    void StartEpisode(int[] startPosition, int[,] rewardMatrix)
+    IEnumerator StartEpisode(int[] startPosition, int[,] rewardMatrix, Vector3[,] grid)
     {
         bool running = true;
 
-        int[] currGridPos = new int[2];
+        int[] currPosition = startPosition;
 
         while (running)
         {
-            List<string> validMoves = GetValidActions(currGridPos, rewardMatrix);
+            List<string> validMoves = GetValidActions(currPosition, rewardMatrix);
+            currPosition = MakeMove(currPosition, validMoves, grid);
+            Debug.Log("Starting wait...");
+            yield return new WaitForSeconds(0.2f);
+            Debug.Log("Done!");
+            if (rewardMatrix[currPosition[0], currPosition[1]] == 50) // If on reward state - value may change from 50 in future
+            {
+                // if more than one reward is in environment add a reward counter, and exit loop when all rewards have been found 
+                
+                Debug.Log("Reached reward state!");
+                break;
+            }
         }
     }
-    int[] MakeMove(int[] currentGridPos, List<string> validMoves)
+    int[] MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid)
     {
         int randAction = UnityEngine.Random.Range(0, validMoves.Count);
-        int action = 0;
 
         if (validMoves[randAction] == "LEFT")
         {
-            action = 1;
+            currPosition[0]--;
         }
         else if (validMoves[randAction] == "RIGHT")
         {
-            action = 2;
+            currPosition[0]++;
         }
         else if (validMoves[randAction] == "UP")
         {
-            action = 3;
+            currPosition[1]++;
         }
         else if (validMoves[randAction] == "DOWN")
         {
-            action = 4;
+            currPosition[1]--;
         }
-
-        return new int[] { action }; // remove this 
-        //int action = validMoves[randAction];
+        gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
+        Debug.Log("New position = " + gameObject.transform.position);
+        return currPosition;
     }
 }
