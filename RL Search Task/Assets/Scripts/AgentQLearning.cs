@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Transactions;
 using System.Xml.Schema;
 using UnityEngine;
 
@@ -10,6 +12,8 @@ public class AgentQLearning : MonoBehaviour
      - Check for valid moves
        
      */
+
+    float totalReward = 0.0f;
 
     // Start is called before the first frame update
     IEnumerator Start()
@@ -23,11 +27,12 @@ public class AgentQLearning : MonoBehaviour
         int[,] rewardMatrix = qLearning.rewards;
         Vector3[,] grid = qLearning.grid;
         GameObject[,] stateObjects = qLearning.stateObjects;
+        float[,] qTable = qLearning.qTable;
 
         int[] startPosition = GetAgentStartPosition(grid, stateObjects);
         
 
-        TrainAgent(1, startPosition, rewardMatrix, grid);
+        TrainAgent(1, startPosition, rewardMatrix, grid, qTable);
 
     }
 
@@ -37,12 +42,12 @@ public class AgentQLearning : MonoBehaviour
         
     }
 
-    int GetCurrentReward(int[,] rewardMatrix, int action, int currentState)
+    int GetCurrentReward(int[,] rewardMatrix, int[] currPosition)
     {
-        return rewardMatrix[currentState, action];
+        return rewardMatrix[currPosition[0], currPosition[1]];
     }
 
-    void GetValidActions(int currentState, int[,] rewardMatrix)
+void GetValidActions(int currentState, int[,] rewardMatrix)
     {
         List<int> validActions = new();
 
@@ -110,16 +115,16 @@ public class AgentQLearning : MonoBehaviour
         return validActions;
     }
     
-    void TrainAgent(int nIter, int[] startPosition, int[,] rewardMatrix, Vector3[,] grid)
+    void TrainAgent(int nIter, int[] startPosition, int[,] rewardMatrix, Vector3[,] grid, float[,] qTable)
     { 
         for (int i = 0; i < nIter; i++) 
         {
             gameObject.transform.position = new Vector3(startPosition[0], 0.2f, startPosition[1]); // Put in start position
-            StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid));
+            StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable));
         }
     }
 
-    IEnumerator StartEpisode(int[] startPosition, int[,] rewardMatrix, Vector3[,] grid)
+    IEnumerator StartEpisode(int[] startPosition, int[,] rewardMatrix, Vector3[,] grid, float[,] qTable)
     {
         bool running = true;
 
@@ -128,10 +133,8 @@ public class AgentQLearning : MonoBehaviour
         while (running)
         {
             List<string> validMoves = GetValidActions(currPosition, rewardMatrix);
-            currPosition = MakeMove(currPosition, validMoves, grid);
-            Debug.Log("Starting wait...");
+            currPosition = MakeMove(currPosition, validMoves, grid, qTable, rewardMatrix);
             yield return new WaitForSeconds(0.2f);
-            Debug.Log("Done!");
             if (rewardMatrix[currPosition[0], currPosition[1]] == 50) // If on reward state - value may change from 50 in future
             {
                 // if more than one reward is in environment add a reward counter, and exit loop when all rewards have been found 
@@ -141,26 +144,72 @@ public class AgentQLearning : MonoBehaviour
             }
         }
     }
-    int[] MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid)
+    int[] MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid, float[,] qTable, int[,] rewardMatrix)
     {
-        int randAction = UnityEngine.Random.Range(0, validMoves.Count);
 
-        if (validMoves[randAction] == "LEFT")
+        /*
+         * Deciding moves:
+         * - Get the valid moves
+         * - Check Q-Table to see which value is the best
+         * - Make sure that value would lead to a valid move
+         * - If invalid, set it to -1 in Q-Table
+         * - If valid, take action and update Q-Table with results
+         */
+
+        List<string> potentialMoves = new() { "LEFT", "RIGHT", "UP", "DOWN" };
+
+        float[] qValues = new float[4];
+        int qTableIdx = currPosition[0] * grid.GetLength(0) + currPosition[1];
+        for (int i = 0; i < qValues.Length; i++)
+        {
+            qValues[i] = qTable[qTableIdx, i]; // Get all relevant Q-Values
+
+            if (!validMoves.Contains(potentialMoves[i])) // If move direction is not a valid move
+            {
+                qValues[i] = 0; 
+            }
+        }
+
+
+        float bestQValue = qValues.Max();
+        int bestIdx = -1;
+        for (int i = 0; i < qValues.Length; i++)
+        {
+            if (bestQValue == qValues[i])
+            {
+                bestIdx = i; // This is the index value of the chosen move
+            }
+        }
+
+        if (bestIdx == 0) // Left
         {
             currPosition[0]--;
         }
-        else if (validMoves[randAction] == "RIGHT")
+        else if (bestIdx == 1) // Right
         {
             currPosition[0]++;
         }
-        else if (validMoves[randAction] == "UP")
+        else if (bestIdx == 2) // Up
         {
             currPosition[1]++;
         }
-        else if (validMoves[randAction] == "DOWN")
+        else if (bestIdx == 3) // Down
         {
             currPosition[1]--;
         }
+        float gamma = 0.8f;
+        float saReward = GetCurrentReward(rewardMatrix, currPosition);
+        totalReward += saReward;
+        Debug.Log("Total reward = " + totalReward);
+        float nsReward = bestQValue;
+        float qCurrentState = saReward + (gamma * nsReward);
+        qValues[bestIdx] = qCurrentState;
+
+        for (int i = 0; i < qValues.Length; i++)
+        {
+            qTable[qTableIdx, i] = qValues[i]; // Updating Q-Table values
+        }
+
         gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
         Debug.Log("New position = " + gameObject.transform.position);
         return currPosition;

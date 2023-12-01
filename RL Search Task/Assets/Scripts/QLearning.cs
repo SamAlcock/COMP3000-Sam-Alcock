@@ -15,6 +15,7 @@ public class QLearning : MonoBehaviour
     public bool isInitialised = false;
 
     public int[,] rewards;
+    public float[,] qTable;
     public Vector3[,] grid;
     public GameObject[,] stateObjects;
 
@@ -34,11 +35,25 @@ public class QLearning : MonoBehaviour
         GameObject negativeMarker = GameObject.Find("Marker --");
 
         grid = GenerateStateGrid(statePoint, positiveMarker, negativeMarker);
+        qTable = InitialiseQTable(grid);
 
         isInitialised = true;
 
     }
+    float[,] InitialiseQTable(Vector3[,] grid)
+    {
+        float[,] qTable = new float[grid.GetLength(0) * grid.GetLength(1), 4]; // Array size: every state * number of actions in every state
+        
+        for (int i = 0; i < qTable.GetLength(0); i++)
+        {
+            for (int j = 0; j < qTable.GetLength(1); j++)
+            {
+                qTable[i, j] = UnityEngine.Random.Range(0.01f, 1f); // Set initial values of Q-Table
+            }
+        }
 
+        return qTable;
+    }
     Vector3[,] GenerateStateGrid(GameObject statePoint, GameObject positiveMarker, GameObject negativeMarker)
     {
 
