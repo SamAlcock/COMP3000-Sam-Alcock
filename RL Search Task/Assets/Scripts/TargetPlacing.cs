@@ -1,14 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class TargetPlacing : MonoBehaviour
 {
     TargetCollision targetCollision;
+
+    public bool targetsPlaced;
     // Start is called before the first frame update
     void Start()
     {
-        int numTargets = 2;
+        int numTargets = 1;
 
         GameObject target = GameObject.Find("Target");
 
@@ -35,6 +38,7 @@ public class TargetPlacing : MonoBehaviour
             targets[i].transform.position = randomPosition;
         }
         Debug.Log("All targets placed successfully");
+        targetsPlaced = true;
         return targets;
     }
     bool InBadPosition(Vector3 position)
@@ -52,7 +56,7 @@ public class TargetPlacing : MonoBehaviour
 
     Vector3 GetPosition()
     {
-        Vector3 position = new(Random.Range(-2.7f, 2.7f), 0.01f, Random.Range(-2.7f, 2.7f));
+        Vector3 position = new((float)Math.Round(UnityEngine.Random.Range(-2.7f, 2.7f)/0.2f)*0.2f, 0.04f, (float)Math.Round(UnityEngine.Random.Range(-2.7f, 2.7f) / 0.2f) * 0.2f);
 
         return position;
     }

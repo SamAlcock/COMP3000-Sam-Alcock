@@ -37,7 +37,7 @@ public class QLearning : MonoBehaviour
         grid = GenerateStateGrid(statePoint, positiveMarker, negativeMarker);
         qTable = InitialiseQTable(grid);
 
-        isInitialised = true;
+        
 
     }
     float[,] InitialiseQTable(Vector3[,] grid)
@@ -85,8 +85,8 @@ public class QLearning : MonoBehaviour
 
         stateObjects = CreateStates(grid, statePoint);
         PickSpawnPoint(stateObjects);
-        stateObjects = TagStates(stateObjects);
-        rewards = GetRewardMatrix(grid, stateObjects);
+        StartCoroutine(TagStates());
+
         
 
         return grid;
@@ -103,7 +103,7 @@ public class QLearning : MonoBehaviour
         {
             for (int z = 0; z < grid.GetLength(1); z++)
             {
-                stateObjects[x,z] = Instantiate(statePoint, grid[x, z], Quaternion.identity);
+                stateObjects[x, z] = Instantiate(statePoint, grid[x, z], Quaternion.identity);
                 stateObjects[x, z].tag = "EmptyState";
             }
 
@@ -119,7 +119,7 @@ public class QLearning : MonoBehaviour
 
         MeshRenderer meshRenderer;
 
-        if (stateObjects[x,z].CompareTag("Obstacle") || stateObjects[x, z].CompareTag("InaccessibleState"))
+        if (stateObjects[x,z].CompareTag("Obstacle") || stateObjects[x, z].CompareTag("InaccessibleState")) // Might need to add reward state to this
         {
             Debug.Log("Bad state pick");
             PickSpawnPoint(stateObjects);
@@ -133,8 +133,10 @@ public class QLearning : MonoBehaviour
         }
     }
 
-    GameObject[,] TagStates(GameObject[,] stateObjects)
+    IEnumerator TagStates()
     {
+        TargetPlacing targetPlacing = GetComponent<TargetPlacing>();
+        yield return new WaitUntil(() => targetPlacing.targetsPlaced); // Wait until targets have been placed
         Collider[] collisions;
 
         for (int i = 0; i < stateObjects.GetLength(0); i++)
@@ -142,10 +144,8 @@ public class QLearning : MonoBehaviour
             for (int j = 0; j < stateObjects.GetLength(1); j++)
             {
                 collisions = Physics.OverlapSphere(stateObjects[i,j].transform.position, 0.05f);
-
                 foreach (Collider collision in collisions)
                 {
-
                     if (collision.CompareTag("Obstacle"))
                     {
                         stateObjects[i, j].tag = "InaccessibleState";
@@ -155,12 +155,14 @@ public class QLearning : MonoBehaviour
                     else if (collision.CompareTag("Target"))
                     {
                         stateObjects[i, j].tag = "RewardState";
+                        MeshRenderer meshRenderer = stateObjects[i, j].GetComponent<MeshRenderer>();
+                        meshRenderer.material.color = Color.yellow;
                     }
                 }
             }
         }
-
-        return stateObjects;
+        rewards = GetRewardMatrix(grid, stateObjects);
+        isInitialised = true;
     }
 
     int[,] GetRewardMatrix(Vector3[,] grid, GameObject[,] stateObjects)
@@ -185,10 +187,21 @@ public class QLearning : MonoBehaviour
                 }
                 else
                 {
-                    rewardMatrix[i, j] = 0;
+                    rewardMatrix[i, j] = -1;
                 }
             }
         }
+        string str = "";
+        for (int i = 0; i < rewardMatrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < rewardMatrix.GetLength(1); j++)
+            {
+                str += " " + rewardMatrix[i, j];
+
+            }
+            str += "\n";
+        }
+        Debug.Log(str);
 
         
 

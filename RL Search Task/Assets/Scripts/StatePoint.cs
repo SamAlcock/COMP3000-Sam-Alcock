@@ -9,12 +9,12 @@ public class StatePoint : MonoBehaviour
         MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
         if (collision.gameObject.CompareTag("Obstacle"))
         {
-            meshRenderer.material.color = Color.grey;
+            //meshRenderer.material.color = Color.grey;
             gameObject.tag = "InaccessibleState";
         }
         else if (collision.gameObject.CompareTag("Target"))
         {
-            meshRenderer.material.color = Color.yellow;
+            //meshRenderer.material.color = Color.yellow;
             gameObject.tag = "RewardState";
         }
     }

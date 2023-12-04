@@ -20,7 +20,7 @@ public class TargetCollision : MonoBehaviour
     private void OnCollisionExit(Collision collision)
     {
         badPosition = false;
-        Debug.Log("No more collision");
+        Debug.Log("No more collision"); // This may need to be changed - picking up collsion exits from agent
     }
 
 }

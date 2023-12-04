@@ -44,6 +44,7 @@ public class AgentQLearning : MonoBehaviour
 
     int GetCurrentReward(int[,] rewardMatrix, int[] currPosition)
     {
+        Debug.Log("Reward here is: " + rewardMatrix[currPosition[0], currPosition[1]]);
         return rewardMatrix[currPosition[0], currPosition[1]];
     }
 
@@ -166,7 +167,7 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
 
             if (!validMoves.Contains(potentialMoves[i])) // If move direction is not a valid move
             {
-                qValues[i] = 0; 
+                qValues[i] = 0; // May need to change this - Q-Values are potentially going below 0 currently, need to remove qValue when its not a valid move
             }
         }
 
@@ -203,6 +204,7 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
         Debug.Log("Total reward = " + totalReward);
         float nsReward = bestQValue;
         float qCurrentState = saReward + (gamma * nsReward);
+        Debug.Log("qCurrentState = " + qCurrentState);
         qValues[bestIdx] = qCurrentState;
 
         for (int i = 0; i < qValues.Length; i++)
@@ -211,7 +213,6 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
         }
 
         gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
-        Debug.Log("New position = " + gameObject.transform.position);
         return currPosition;
     }
 }
