@@ -44,7 +44,6 @@ public class AgentQLearning : MonoBehaviour
 
     int GetCurrentReward(int[,] rewardMatrix, int[] currPosition)
     {
-        Debug.Log("Reward here is: " + rewardMatrix[currPosition[0], currPosition[1]]);
         return rewardMatrix[currPosition[0], currPosition[1]];
     }
 
@@ -112,7 +111,7 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
         {
             validActions.Add("UP");
         }
-        Debug.Log("Valid actions: " + string.Join(", ", validActions));
+        // Debug.Log("Valid actions: " + string.Join(", ", validActions));
         return validActions;
     }
     
@@ -121,29 +120,36 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
         for (int i = 0; i < nIter; i++) 
         {
             gameObject.transform.position = new Vector3(startPosition[0], 0.2f, startPosition[1]); // Put in start position
-            StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable));
+            StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable, 0));
         }
     }
 
-    IEnumerator StartEpisode(int[] startPosition, int[,] rewardMatrix, Vector3[,] grid, float[,] qTable)
+    IEnumerator StartEpisode(int[] startPosition, int[,] rewardMatrix, Vector3[,] grid, float[,] qTable, int generation)
     {
         bool running = true;
 
+        
+
         int[] currPosition = startPosition;
+
+        Debug.Log("Generation: " + generation);
 
         while (running)
         {
             List<string> validMoves = GetValidActions(currPosition, rewardMatrix);
             currPosition = MakeMove(currPosition, validMoves, grid, qTable, rewardMatrix);
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f);
             if (rewardMatrix[currPosition[0], currPosition[1]] == 50) // If on reward state - value may change from 50 in future
             {
                 // if more than one reward is in environment add a reward counter, and exit loop when all rewards have been found 
                 
                 Debug.Log("Reached reward state!");
+                gameObject.transform.position = new Vector3(startPosition[0], 0.2f, startPosition[1]); // Put in start position
                 break;
             }
         }
+        generation++;
+        StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable, generation));
     }
     int[] MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid, float[,] qTable, int[,] rewardMatrix)
     {
@@ -167,7 +173,7 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
 
             if (!validMoves.Contains(potentialMoves[i])) // If move direction is not a valid move
             {
-                qValues[i] = 0; // May need to change this - Q-Values are potentially going below 0 currently, need to remove qValue when its not a valid move
+                qValues[i] = -50000; // May need to change this - Q-Values are potentially going below 0 currently, need to remove qValue when its not a valid move
             }
         }
 
@@ -201,10 +207,9 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
         float gamma = 0.8f;
         float saReward = GetCurrentReward(rewardMatrix, currPosition);
         totalReward += saReward;
-        Debug.Log("Total reward = " + totalReward);
         float nsReward = bestQValue;
         float qCurrentState = saReward + (gamma * nsReward);
-        Debug.Log("qCurrentState = " + qCurrentState);
+        // Debug.Log("qCurrentState = " + qCurrentState);
         qValues[bestIdx] = qCurrentState;
 
         for (int i = 0; i < qValues.Length; i++)

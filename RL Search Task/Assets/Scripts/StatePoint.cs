@@ -6,6 +6,7 @@ public class StatePoint : MonoBehaviour
 {
     private void OnCollisionEnter(Collision collision)
     {
+        // This code is likely not needed
         MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
         if (collision.gameObject.CompareTag("Obstacle"))
         {

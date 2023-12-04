@@ -11,7 +11,7 @@ public class TargetPlacing : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        int numTargets = 1;
+        int numTargets = 5;
 
         GameObject target = GameObject.Find("Target");
 
