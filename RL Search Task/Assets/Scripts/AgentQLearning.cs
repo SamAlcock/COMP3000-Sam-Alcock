@@ -129,21 +129,25 @@ public class AgentQLearning : MonoBehaviour
         bool running = true;
 
         gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put in start position
-        Debug.Log("Agent position = " + gameObject.transform.position);
-        Debug.Log("Start position = " + string.Join(", ", startPosition));
         int[] currPosition = (int[])startPosition.Clone();
         Debug.Log("Generation: " + generation);
-
+        int step = 0;
         while (running)
         {
+            step++;
             List<string> validMoves = GetValidActions(currPosition, rewardMatrix);
             currPosition = MakeMove(currPosition, validMoves, grid, qTable, rewardMatrix);
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(0.005f);
             if (rewardMatrix[currPosition[0], currPosition[1]] == 50) // If on reward state - value may change from 50 in future
             {
                 // if more than one reward is in environment add a reward counter, and exit loop when all rewards have been found 
-                
+
                 Debug.Log("Reached reward state!");
+                break;
+            }
+            else if (step == 100)
+            {
+                Debug.Log("Maximum steps for single iteration reached");
                 break;
             }
         }
@@ -179,6 +183,7 @@ public class AgentQLearning : MonoBehaviour
 
         float bestQValue = qValues.Max();
         int bestIdx = -1;
+
         for (int i = 0; i < qValues.Length; i++)
         {
             if (bestQValue == qValues[i])
