@@ -47,7 +47,7 @@ public class AgentQLearning : MonoBehaviour
         return rewardMatrix[currPosition[0], currPosition[1]];
     }
 
-void GetValidActions(int currentState, int[,] rewardMatrix)
+    void GetValidActions(int currentState, int[,] rewardMatrix)
     {
         List<int> validActions = new();
 
@@ -119,7 +119,7 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
     { 
         for (int i = 0; i < nIter; i++) 
         {
-            gameObject.transform.position = new Vector3(startPosition[0], 0.2f, startPosition[1]); // Put in start position
+            
             StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable, 0));
         }
     }
@@ -128,23 +128,22 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
     {
         bool running = true;
 
-        
-
-        int[] currPosition = startPosition;
-
+        gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put in start position
+        Debug.Log("Agent position = " + gameObject.transform.position);
+        Debug.Log("Start position = " + string.Join(", ", startPosition));
+        int[] currPosition = (int[])startPosition.Clone();
         Debug.Log("Generation: " + generation);
 
         while (running)
         {
             List<string> validMoves = GetValidActions(currPosition, rewardMatrix);
             currPosition = MakeMove(currPosition, validMoves, grid, qTable, rewardMatrix);
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.05f);
             if (rewardMatrix[currPosition[0], currPosition[1]] == 50) // If on reward state - value may change from 50 in future
             {
                 // if more than one reward is in environment add a reward counter, and exit loop when all rewards have been found 
                 
                 Debug.Log("Reached reward state!");
-                gameObject.transform.position = new Vector3(startPosition[0], 0.2f, startPosition[1]); // Put in start position
                 break;
             }
         }
@@ -204,7 +203,7 @@ void GetValidActions(int currentState, int[,] rewardMatrix)
         {
             currPosition[1]--;
         }
-        float gamma = 0.8f;
+        float gamma = 0.99f;
         float saReward = GetCurrentReward(rewardMatrix, currPosition);
         totalReward += saReward;
         float nsReward = bestQValue;

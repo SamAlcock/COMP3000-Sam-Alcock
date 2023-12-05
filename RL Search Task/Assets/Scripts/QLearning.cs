@@ -48,7 +48,7 @@ public class QLearning : MonoBehaviour
         {
             for (int j = 0; j < qTable.GetLength(1); j++)
             {
-                qTable[i, j] = UnityEngine.Random.Range(0.01f, 1f); // Set initial values of Q-Table
+                qTable[i, j] = UnityEngine.Random.Range(-1f, 0f); // Set initial values of Q-Table
             }
         }
 
