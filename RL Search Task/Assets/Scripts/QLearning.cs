@@ -175,7 +175,7 @@ public class QLearning : MonoBehaviour
             {
                 if (stateObjects[i, j].CompareTag("EmptyState"))
                 {
-                    rewardMatrix[i, j] = -1;
+                    rewardMatrix[i, j] = -5;
                 }
                 else if (stateObjects[i, j].CompareTag("InaccessibleState"))
                 {
@@ -187,7 +187,7 @@ public class QLearning : MonoBehaviour
                 }
                 else
                 {
-                    rewardMatrix[i, j] = -1;
+                    rewardMatrix[i, j] = -5;
                 }
             }
         }

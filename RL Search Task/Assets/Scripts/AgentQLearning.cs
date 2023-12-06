@@ -14,6 +14,7 @@ public class AgentQLearning : MonoBehaviour
      */
 
     float totalReward = 0.0f;
+    public int generation = 0;
 
     // Start is called before the first frame update
     IEnumerator Start()
@@ -120,39 +121,38 @@ public class AgentQLearning : MonoBehaviour
         for (int i = 0; i < nIter; i++) 
         {
             
-            StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable, 0));
+            StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable));
         }
     }
 
-    IEnumerator StartEpisode(int[] startPosition, int[,] rewardMatrix, Vector3[,] grid, float[,] qTable, int generation)
+    IEnumerator StartEpisode(int[] startPosition, int[,] rewardMatrix, Vector3[,] grid, float[,] qTable)
     {
         bool running = true;
-
+        totalReward = 0;
         gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put in start position
         int[] currPosition = (int[])startPosition.Clone();
-        Debug.Log("Generation: " + generation);
         int step = 0;
         while (running)
         {
             step++;
             List<string> validMoves = GetValidActions(currPosition, rewardMatrix);
             currPosition = MakeMove(currPosition, validMoves, grid, qTable, rewardMatrix);
-            yield return new WaitForSeconds(0.005f);
+            yield return new WaitForSeconds(0.0005f);
             if (rewardMatrix[currPosition[0], currPosition[1]] == 50) // If on reward state - value may change from 50 in future
             {
                 // if more than one reward is in environment add a reward counter, and exit loop when all rewards have been found 
 
-                Debug.Log("Reached reward state!");
+                Debug.Log("Generation: " + generation + ", reached reward state! Total reward = " + totalReward);
                 break;
             }
             else if (step == 100)
             {
-                Debug.Log("Maximum steps for single iteration reached");
+                Debug.Log("Generation: " + generation + ", maximum steps for single iteration reached. Total reward = " + totalReward);
                 break;
             }
         }
         generation++;
-        StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable, generation));
+        StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable));
     }
     int[] MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid, float[,] qTable, int[,] rewardMatrix)
     {
