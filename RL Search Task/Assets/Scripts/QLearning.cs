@@ -63,8 +63,8 @@ public class QLearning : MonoBehaviour
         float widthZ = positiveMarker.transform.position.z - negativeMarker.transform.position.z;
 
         // Gap between grid points - decrease gap to increase point density
-        float xGap = 0.2f;
-        float zGap = 0.2f;
+        float xGap = 0.3f;
+        float zGap = 0.3f;
 
         // Calculate how many state points can fit between both corner markers using the defined gaps
         int elementsX = Convert.ToInt32(widthX / xGap);
@@ -175,7 +175,7 @@ public class QLearning : MonoBehaviour
             {
                 if (stateObjects[i, j].CompareTag("EmptyState"))
                 {
-                    rewardMatrix[i, j] = -5;
+                    rewardMatrix[i, j] = -1;
                 }
                 else if (stateObjects[i, j].CompareTag("InaccessibleState"))
                 {
@@ -187,7 +187,7 @@ public class QLearning : MonoBehaviour
                 }
                 else
                 {
-                    rewardMatrix[i, j] = -5;
+                    rewardMatrix[i, j] = -1;
                 }
             }
         }

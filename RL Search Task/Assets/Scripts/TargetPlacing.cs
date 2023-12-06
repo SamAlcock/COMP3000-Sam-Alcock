@@ -56,7 +56,7 @@ public class TargetPlacing : MonoBehaviour
 
     Vector3 GetPosition()
     {
-        Vector3 position = new((float)Math.Round(UnityEngine.Random.Range(-2.7f, 2.7f)/0.2f)*0.2f, 0.04f, (float)Math.Round(UnityEngine.Random.Range(-2.7f, 2.7f) / 0.2f) * 0.2f);
+        Vector3 position = new((float)Math.Round(UnityEngine.Random.Range(-2.7f, 2.7f) / 0.3f) * 0.3f, 0.04f, (float)Math.Round(UnityEngine.Random.Range(-2.7f, 2.7f) / 0.3f) * 0.3f);
 
         return position;
     }
