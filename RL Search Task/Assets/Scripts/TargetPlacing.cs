@@ -14,8 +14,10 @@ public class TargetPlacing : MonoBehaviour
         int numTargets = 8;
 
         GameObject target = GameObject.Find("Target");
+        if (!gameObject.name.Contains("Clone")){
+            PlaceTargets(numTargets, target);
+        }
 
-        PlaceTargets(numTargets, target);
 
     }
 

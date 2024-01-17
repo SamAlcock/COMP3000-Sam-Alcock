@@ -15,6 +15,7 @@ public class QLearning : MonoBehaviour
     public bool isInitialised = false;
 
     public int[,] rewards;
+    public int[] startStateCoords;
     public float[,] qTable;
     public Vector3[,] grid;
     public GameObject[,] stateObjects;
@@ -33,7 +34,7 @@ public class QLearning : MonoBehaviour
         GameObject statePoint = GameObject.Find("State point");
         GameObject positiveMarker = GameObject.Find("Marker ++");
         GameObject negativeMarker = GameObject.Find("Marker --");
-
+        
         grid = GenerateStateGrid(statePoint, positiveMarker, negativeMarker);
         qTable = InitialiseQTable(grid);
 
@@ -84,7 +85,24 @@ public class QLearning : MonoBehaviour
         }
 
         stateObjects = CreateStates(grid, statePoint);
-        PickSpawnPoint(stateObjects);
+
+        if (gameObject.name.Contains("Clone"))
+        {
+            GameObject env = GameObject.Find("Environment");
+            QLearning qLearning = env.GetComponent<QLearning>();
+            startStateCoords = qLearning.startStateCoords;
+
+            MeshRenderer meshRenderer;
+            meshRenderer = stateObjects[startStateCoords[0], startStateCoords[1]].GetComponent<MeshRenderer>();
+
+            meshRenderer.material.color = Color.blue;
+            stateObjects[startStateCoords[0], startStateCoords[1]].tag = "StartState";
+        }
+        else
+        {
+            startStateCoords = PickSpawnPoint(stateObjects);
+        }
+
         StartCoroutine(TagStates());
 
         
@@ -114,7 +132,7 @@ public class QLearning : MonoBehaviour
         return stateObjects;
     }
 
-    void PickSpawnPoint(GameObject[,] stateObjects)
+    int[] PickSpawnPoint(GameObject[,] stateObjects)
     {
         int x = UnityEngine.Random.Range(0, stateObjects.GetLength(0) - 1);
         int z = UnityEngine.Random.Range(0, stateObjects.GetLength(1) - 1);
@@ -133,6 +151,8 @@ public class QLearning : MonoBehaviour
             meshRenderer.material.color = Color.blue;
             stateObjects[x, z].tag = "StartState";
         }
+        int[] startCoords = new int[2] { x, z };
+        return startCoords;
     }
 
     IEnumerator TagStates()
