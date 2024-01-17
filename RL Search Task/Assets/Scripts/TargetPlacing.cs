@@ -11,7 +11,7 @@ public class TargetPlacing : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        int numTargets = 15;
+        int numTargets = 8;
 
         GameObject target = GameObject.Find("Target");
 
@@ -39,6 +39,14 @@ public class TargetPlacing : MonoBehaviour
         }
         Debug.Log("All targets placed successfully");
         targetsPlaced = true;
+
+        GameObject env = GameObject.Find("Environment");
+
+        foreach(GameObject t in targets)
+        {
+            t.transform.parent = env.transform;
+        }
+
         return targets;
     }
     bool InBadPosition(Vector3 position)

@@ -96,7 +96,7 @@ public class QLearning : MonoBehaviour
     GameObject[,] CreateStates(Vector3[,] grid, GameObject statePoint)
     {
 
-
+        GameObject env = GameObject.Find("Environment");
         GameObject[,] stateObjects = new GameObject[grid.GetLength(0), grid.GetLength(1)];
 
         for (int x = 0; x < grid.GetLength(0); x++)
@@ -105,6 +105,8 @@ public class QLearning : MonoBehaviour
             {
                 stateObjects[x, z] = Instantiate(statePoint, grid[x, z], Quaternion.identity);
                 stateObjects[x, z].tag = "EmptyState";
+
+                stateObjects[x, z].transform.parent = env.transform;
             }
 
         }

@@ -16,6 +16,8 @@ public class AgentQLearning : MonoBehaviour
     float totalReward = 0.0f;
     public int generation = 0;
 
+    [SerializeField] float stepTime = 0.05f;
+
     // Start is called before the first frame update
     IEnumerator Start()
     {
@@ -137,7 +139,7 @@ public class AgentQLearning : MonoBehaviour
             step++;
             List<string> validMoves = GetValidActions(currPosition, rewardMatrix);
             currPosition = MakeMove(currPosition, validMoves, grid, qTable, rewardMatrix);
-            yield return new WaitForSeconds(0.0005f);
+            yield return new WaitForSeconds(stepTime);
             if (rewardMatrix[currPosition[0], currPosition[1]] == 50) // If on reward state - value may change from 50 in future
             {
                 // if more than one reward is in environment add a reward counter, and exit loop when all rewards have been found 
