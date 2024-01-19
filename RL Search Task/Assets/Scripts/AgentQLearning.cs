@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -172,15 +173,7 @@ public class AgentQLearning : MonoBehaviour
 
         float[] qValues = new float[4];
         int qTableIdx = currPosition[0] * grid.GetLength(0) + currPosition[1];
-        for (int i = 0; i < qValues.Length; i++)
-        {
-            qValues[i] = qTable[qTableIdx, i]; // Get all relevant Q-Values
-
-            if (!validMoves.Contains(potentialMoves[i])) // If move direction is not a valid move
-            {
-                qValues[i] = -50000; // May need to change this - Q-Values are potentially going below 0 currently, need to remove qValue when its not a valid move
-            }
-        }
+        qValues = GetRelevantQValues(qTableIdx, qTable, qValues, validMoves, potentialMoves);
 
 
         float bestQValue = qValues.Max();
@@ -213,10 +206,21 @@ public class AgentQLearning : MonoBehaviour
         float gamma = 0.99f;
         float saReward = GetCurrentReward(rewardMatrix, currPosition);
         totalReward += saReward;
+
+        float[] qValuesNew = new float[4];
+        int qTableIdxNew = currPosition[0] * grid.GetLength(0) + currPosition[1];
+        qValuesNew = GetRelevantQValues(qTableIdxNew, qTable, qValuesNew, validMoves, potentialMoves);
+        bestQValue = qValuesNew.Max();
         float nsReward = bestQValue;
         float qCurrentState = saReward + (gamma * nsReward);
         // Debug.Log("qCurrentState = " + qCurrentState);
         qValues[bestIdx] = qCurrentState;
+        Debug.Log("Q-Value for this state = " + qCurrentState);
+        // SARSA
+        if (gameObject.name.Contains("SARSA"))
+        {
+            
+        }
 
         for (int i = 0; i < qValues.Length; i++)
         {
@@ -225,5 +229,18 @@ public class AgentQLearning : MonoBehaviour
 
         gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
         return currPosition;
+    }
+    float[] GetRelevantQValues(int qTableIdx, float[,] qTable, float[] qValues, List<string> validMoves, List<string> potentialMoves)
+    {
+        for (int i = 0; i < qValues.Length; i++)
+        {
+            qValues[i] = qTable[qTableIdx, i]; // Get all relevant Q-Values
+
+            if (!validMoves.Contains(potentialMoves[i])) // If move direction is not a valid move
+            {
+                qValues[i] = -50000; // May need to change this - Q-Values are potentially going below 0 currently, need to remove qValue when its not a valid move
+            }
+        }
+        return qValues;
     }
 }

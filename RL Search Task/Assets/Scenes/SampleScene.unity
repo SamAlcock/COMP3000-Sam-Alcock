@@ -907,7 +907,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   generation: 0
-  stepTime: 0.05
+  stepTime: 0.3
 --- !u!1001 &1096207628
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1395,6 +1395,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visualiseStates: 1
   isInitialised: 0
+  startStateCoords: 
 --- !u!114 &1972560594
 MonoBehaviour:
   m_ObjectHideFlags: 0
