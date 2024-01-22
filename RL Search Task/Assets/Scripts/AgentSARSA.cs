@@ -6,7 +6,7 @@ using System.Transactions;
 using System.Xml.Schema;
 using UnityEngine;
 
-public class AgentQLearning : MonoBehaviour
+public class AgentSARSA : MonoBehaviour
 {
     /*
      Q-LEARNING AGENT
@@ -135,11 +135,14 @@ public class AgentQLearning : MonoBehaviour
         gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put in start position
         int[] currPosition = (int[])startPosition.Clone();
         int step = 0;
+        string prevAction = null;
         while (running)
         {
             step++;
             List<string> validMoves = GetValidActions(currPosition, rewardMatrix);
-            currPosition = MakeMove(currPosition, validMoves, grid, qTable, rewardMatrix);
+            var values = MakeMove(currPosition, validMoves, grid, qTable, rewardMatrix, prevAction);
+            currPosition = values.Item1;
+            prevAction = values.Item2;
             yield return new WaitForSeconds(stepTime);
             if (rewardMatrix[currPosition[0], currPosition[1]] == 50) // If on reward state - value may change from 50 in future
             {
@@ -157,52 +160,74 @@ public class AgentQLearning : MonoBehaviour
         generation++;
         StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable));
     }
-    int[] MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid, float[,] qTable, int[,] rewardMatrix)
+    (int[], string) MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid, float[,] qTable, int[,] rewardMatrix, string prevAction)
     {
 
         /*
-         * Deciding moves:
-         * - Get the valid moves
-         * - Check Q-Table to see which value is the best
-         * - Make sure that value would lead to a valid move
-         * - If invalid, set it to -1 in Q-Table
-         * - If valid, take action and update Q-Table with results
-         */
+             * Q-Learning takes the maximum Q-Value of the state it has moved to in its calculations
+             * SARSA decides the action to take in the next state and adds it to its calculations
+             * nsReward needs to be Q-Value of the next action
+             * 
+             * SARSA - get decided action, choose next action, update, repeat
+        */
 
         List<string> potentialMoves = new() { "LEFT", "RIGHT", "UP", "DOWN" };
 
         float[] qValues = new float[4];
+
         int qTableIdx = currPosition[0] * grid.GetLength(0) + currPosition[1];
         qValues = GetRelevantQValues(qTableIdx, qTable, qValues, validMoves, potentialMoves);
-
-
         float bestQValue = qValues.Max();
         int bestIdx = -1;
 
-        for (int i = 0; i < qValues.Length; i++)
+        if (prevAction == null)
         {
-            if (bestQValue == qValues[i])
+
+            for (int i = 0; i < qValues.Length; i++)
             {
-                bestIdx = i; // This is the index value of the chosen move
+                if (bestQValue == qValues[i])
+                {
+                    bestIdx = i; // This is the index value of the chosen move
+                }
+            }
+
+            if (bestIdx == 0) // Left
+            {
+                currPosition[0]--;
+            }
+            else if (bestIdx == 1) // Right
+            {
+                currPosition[0]++;
+            }
+            else if (bestIdx == 2) // Up
+            {
+                currPosition[1]++;
+            }
+            else if (bestIdx == 3) // Down
+            {
+                currPosition[1]--;
             }
         }
-
-        if (bestIdx == 0) // Left
+      
+        else if (prevAction == "LEFT") // Left
         {
             currPosition[0]--;
         }
-        else if (bestIdx == 1) // Right
+        else if (prevAction == "RIGHT") // Right
         {
             currPosition[0]++;
         }
-        else if (bestIdx == 2) // Up
+        else if (prevAction == "UP") // Up
         {
             currPosition[1]++;
         }
-        else if (bestIdx == 3) // Down
+        else if (prevAction == "DOWN") // Down
         {
             currPosition[1]--;
         }
+        
+        
+
         float gamma = 0.99f;
         float saReward = GetCurrentReward(rewardMatrix, currPosition);
         totalReward += saReward;
@@ -210,23 +235,12 @@ public class AgentQLearning : MonoBehaviour
         float[] qValuesNew = new float[4];
         int qTableIdxNew = currPosition[0] * grid.GetLength(0) + currPosition[1];
         qValuesNew = GetRelevantQValues(qTableIdxNew, qTable, qValuesNew, validMoves, potentialMoves);
+        prevAction = GetNextPrevAction(qValuesNew);
         bestQValue = qValuesNew.Max();
         float nsReward = bestQValue;
+
         float qCurrentState = saReward + (gamma * nsReward);
-        // Debug.Log("qCurrentState = " + qCurrentState);
         qValues[bestIdx] = qCurrentState;
-        Debug.Log("Q-Value for this state = " + qCurrentState);
-        // SARSA
-        if (gameObject.name.Contains("SARSA"))
-        {
-            /*
-             * Q-Learning takes the maximum Q-Value of the state it has moved to in its calculations
-             * SARSA decides the action to take in the next state and adds it to its calculations
-             * nsReward needs to be Q-Value of the next action
-             * 
-             * SARSA - choose action, choose next action, update based on 
-             */
-        }
 
         for (int i = 0; i < qValues.Length; i++)
         {
@@ -234,7 +248,7 @@ public class AgentQLearning : MonoBehaviour
         }
 
         gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
-        return currPosition;
+        return (currPosition, prevAction);
     }
     float[] GetRelevantQValues(int qTableIdx, float[,] qTable, float[] qValues, List<string> validMoves, List<string> potentialMoves)
     {
@@ -248,5 +262,36 @@ public class AgentQLearning : MonoBehaviour
             }
         }
         return qValues;
+    }
+
+    string GetNextPrevAction(float[] qValues)
+    {
+        int bestIdx = -1;
+        float bestQValue = qValues.Max();
+        string prevAction = null;
+        for (int i = 0; i < qValues.Length; i++)
+        {
+            if (bestQValue == qValues[i])
+            {
+                bestIdx = i; // This is the index value of the chosen move
+            }
+        }
+        if (bestIdx == 0) // Left
+        {
+            prevAction = "LEFT";
+        }
+        else if (bestIdx == 1) // Right
+        {
+            prevAction = "RIGHT";
+        }
+        else if (bestIdx == 2) // Up
+        {
+            prevAction = "UP";
+        }
+        else if (bestIdx == 3) // Down
+        {
+            prevAction = "DOWN";
+        }
+        return prevAction;
     }
 }
