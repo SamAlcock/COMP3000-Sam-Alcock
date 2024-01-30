@@ -11,6 +11,8 @@ TagManager:
   - StartState
   - EmptyState
   - QLAgent
+  - envSARSA
+  - envQL
   layers:
   - Default
   - TransparentFX

@@ -215,18 +215,7 @@ public class AgentQLearning : MonoBehaviour
         float qCurrentState = saReward + (gamma * nsReward);
         // Debug.Log("qCurrentState = " + qCurrentState);
         qValues[bestIdx] = qCurrentState;
-        Debug.Log("Q-Value for this state = " + qCurrentState);
-        // SARSA
-        if (gameObject.name.Contains("SARSA"))
-        {
-            /*
-             * Q-Learning takes the maximum Q-Value of the state it has moved to in its calculations
-             * SARSA decides the action to take in the next state and adds it to its calculations
-             * nsReward needs to be Q-Value of the next action
-             * 
-             * SARSA - choose action, choose next action, update based on 
-             */
-        }
+        //Debug.Log("Q-Value for this state = " + qCurrentState);
 
         for (int i = 0; i < qValues.Length; i++)
         {

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Timeline;
 using UnityEngine.UIElements;
@@ -20,6 +21,7 @@ public class QLearning : MonoBehaviour
     public Vector3[,] grid;
     public GameObject[,] stateObjects;
 
+
     /*
      *   Q-Learning
      *   - Set up a grid in area - each square in grid acts as a state
@@ -31,14 +33,27 @@ public class QLearning : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GameObject statePoint = GameObject.Find("State point");
-        GameObject positiveMarker = GameObject.Find("Marker ++");
-        GameObject negativeMarker = GameObject.Find("Marker --");
+        GameObject statePoint = GameObject.Find("State point"), positiveMarker = null, negativeMarker = null;
+
+        foreach(Transform child in gameObject.transform)
+        {
+            if(child.gameObject.name == "Marker ++")
+            {
+                positiveMarker = GameObject.Find("Marker ++");
+            }
+            else if (child.gameObject.name == "Marker --")
+            {
+                negativeMarker = GameObject.Find("Marker --");
+            }
+        }
+
+        Renderer rend = positiveMarker.GetComponent<Renderer>();
+        rend.material.color = Color.blue;
         
         grid = GenerateStateGrid(statePoint, positiveMarker, negativeMarker);
         qTable = InitialiseQTable(grid);
 
-        
+        //isInitialised = true;
 
     }
     float[,] InitialiseQTable(Vector3[,] grid)
@@ -84,10 +99,45 @@ public class QLearning : MonoBehaviour
             }
         }
 
-        stateObjects = CreateStates(grid, statePoint);
+        
 
         if (gameObject.name.Contains("Clone"))
         {
+            GameObject[] stateObjects1D = new GameObject[grid.GetLength(0) * grid.GetLength(1)];
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                GameObject child = transform.GetChild(i).gameObject;
+
+                if(child.tag == "StartState" || child.tag == "EmptyState" || child.tag == "RewardState" || child.tag == "InaccessibleState")
+                {
+                    for (int j = 0; j < transform.childCount; j++)
+                    {   
+                        GameObject childState = transform.GetChild(j).gameObject;
+                        if(childState.tag == "StartState" || childState.tag == "EmptyState" || childState.tag == "RewardState" || childState.tag == "InaccessibleState")
+                        {
+                            stateObjects1D[j] = childState;
+                        }
+                        else
+                        {
+                            break;
+                        }
+
+                    }
+                        
+                }
+
+            }
+            int idx = 0;
+            for (int x = 0; x < grid.GetLength(0); x++)
+            {
+                for (int z = 0; z < grid.GetLength(1); z++)
+                {
+                    stateObjects[x, z] = stateObjects1D[idx];
+                    idx++;
+                }
+
+            }
+
             GameObject env = GameObject.Find("Environment");
             QLearning qLearning = env.GetComponent<QLearning>();
             startStateCoords = qLearning.startStateCoords;
@@ -100,6 +150,7 @@ public class QLearning : MonoBehaviour
         }
         else
         {
+            stateObjects = CreateStates(grid, statePoint);
             startStateCoords = PickSpawnPoint(stateObjects);
         }
 
@@ -114,7 +165,6 @@ public class QLearning : MonoBehaviour
     GameObject[,] CreateStates(Vector3[,] grid, GameObject statePoint)
     {
 
-        GameObject env = GameObject.Find("Environment");
         GameObject[,] stateObjects = new GameObject[grid.GetLength(0), grid.GetLength(1)];
 
         for (int x = 0; x < grid.GetLength(0); x++)
@@ -124,7 +174,7 @@ public class QLearning : MonoBehaviour
                 stateObjects[x, z] = Instantiate(statePoint, grid[x, z], Quaternion.identity);
                 stateObjects[x, z].tag = "EmptyState";
 
-                stateObjects[x, z].transform.parent = env.transform;
+                stateObjects[x, z].transform.parent = gameObject.transform;
             }
 
         }
@@ -185,6 +235,7 @@ public class QLearning : MonoBehaviour
         }
         rewards = GetRewardMatrix(grid, stateObjects);
         isInitialised = true;
+
     }
 
     int[,] GetRewardMatrix(Vector3[,] grid, GameObject[,] stateObjects)
@@ -224,8 +275,6 @@ public class QLearning : MonoBehaviour
             str += "\n";
         }
         Debug.Log(str);
-
-        
 
         return rewardMatrix;
     }

@@ -5,13 +5,18 @@ using UnityEngine.UIElements;
 
 public class EnvironmentManager : MonoBehaviour
 {
+    public bool isInitialised = false;
     // Start is called before the first frame update
     IEnumerator Start()
     {
         GameObject env = GameObject.Find("Environment");
         QLearning qLearning = env.GetComponent<QLearning>();
         yield return new WaitUntil(() => qLearning.isInitialised); // Wait until variables from QLearning.cs have been initialised
-        Instantiate(env, new Vector3(env.transform.position.x, env.transform.position.y, env.transform.position.z + 6), Quaternion.identity);
+        GameObject envSARSA = Instantiate(env, new Vector3(env.transform.position.x, env.transform.position.y, env.transform.position.z + 6), Quaternion.identity);
+        envSARSA.tag = "envSARSA";
+        QLearning sarsa = envSARSA.GetComponent<QLearning>();
+        yield return new WaitUntil(() => sarsa.isInitialised);
+        isInitialised = true;
     }
 
     // Update is called once per frame

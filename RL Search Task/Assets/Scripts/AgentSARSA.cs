@@ -22,11 +22,16 @@ public class AgentSARSA : MonoBehaviour
     // Start is called before the first frame update
     IEnumerator Start()
     {
-        GameObject env = GameObject.Find("Environment");
+        GameObject master = GameObject.Find("Master");
+        EnvironmentManager environmentManager = master.GetComponent<EnvironmentManager>();
+
+        yield return new WaitUntil(() => environmentManager.isInitialised);
+
+        GameObject env = GameObject.Find("Environment(Clone)");
         QLearning qLearning = env.GetComponent<QLearning>();
+
         yield return new WaitUntil(() => qLearning.isInitialised); // Wait until variables from QLearning.cs have been initialised
-
-
+        
 
         int[,] rewardMatrix = qLearning.rewards;
         Vector3[,] grid = qLearning.grid;
@@ -51,11 +56,7 @@ public class AgentSARSA : MonoBehaviour
         return rewardMatrix[currPosition[0], currPosition[1]];
     }
 
-    void GetValidActions(int currentState, int[,] rewardMatrix)
-    {
-        List<int> validActions = new();
-
-    }
+    
     int[] GetAgentStartPosition(Vector3[,] grid, GameObject[,] stateObjects)
     {
         int[] startPosition = new int[2];
@@ -73,6 +74,7 @@ public class AgentSARSA : MonoBehaviour
                 }
             }
         }
+        Debug.Log(string.Join(", ", startPosition) + " is the start position for SARSA Agent");
         return startPosition;
     }
     int[] GetCurrentPosition(Vector3[,] grid, GameObject[,] stateObjects)
@@ -98,7 +100,8 @@ public class AgentSARSA : MonoBehaviour
     List<string> GetValidActions(int[] currPosition, int[,] rewardMatrix)
     {
         List<string> validActions = new();
-
+        Debug.Log("currPosition[0] = " + currPosition[0]);
+        Debug.Log("rewardMatrix[currPosition[0] + 1, currPosition[1]] = " + rewardMatrix[currPosition[0] + 1, currPosition[1]]);
         if (currPosition[0] + 1 < rewardMatrix.GetLength(0) && rewardMatrix[currPosition[0] + 1, currPosition[1]] != -50)
         {
             validActions.Add("RIGHT");
@@ -212,18 +215,22 @@ public class AgentSARSA : MonoBehaviour
         else if (prevAction == "LEFT") // Left
         {
             currPosition[0]--;
+            bestIdx = 0;
         }
         else if (prevAction == "RIGHT") // Right
         {
             currPosition[0]++;
+            bestIdx = 1;
         }
         else if (prevAction == "UP") // Up
         {
             currPosition[1]++;
+            bestIdx = 2;
         }
         else if (prevAction == "DOWN") // Down
         {
             currPosition[1]--;
+            bestIdx = 3;
         }
         
         
@@ -240,6 +247,7 @@ public class AgentSARSA : MonoBehaviour
         float nsReward = bestQValue;
 
         float qCurrentState = saReward + (gamma * nsReward);
+        Debug.Log("bestIdx = " + bestIdx);
         qValues[bestIdx] = qCurrentState;
 
         for (int i = 0; i < qValues.Length; i++)
