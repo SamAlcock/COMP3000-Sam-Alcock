@@ -64,6 +64,7 @@ public class AgentSARSA : MonoBehaviour
         {
             for (int j = 0; j < stateObjects.GetLength(1); j++)
             {
+                Debug.Log("i = " + i + ", j = " + j);
                 if (stateObjects[i, j].CompareTag("StartState"))
                 {
 

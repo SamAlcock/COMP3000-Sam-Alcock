@@ -29,6 +29,7 @@ public class QLearning : MonoBehaviour
      *   - Reward matrix
      */
 
+    // IF STARTING STATE HAS COLLIDED WITH OBSTACLE, THEN IT WILL SPAWN THE AGENT IN THE CORNER
 
     // Start is called before the first frame update
     void Start()
@@ -121,40 +122,36 @@ public class QLearning : MonoBehaviour
                         {
                             break;
                         }
-
-                    }
-                        
+                    }       
                 }
-
             }
             int idx = 0;
+            GameObject[,] stateObjects2D = new GameObject[grid.GetLength(0), grid.GetLength(1)];
             for (int x = 0; x < grid.GetLength(0); x++)
             {
                 for (int z = 0; z < grid.GetLength(1); z++)
                 {
-                    stateObjects[x, z] = stateObjects1D[idx];
+                    stateObjects2D[x, z] = stateObjects1D[idx];
                     idx++;
                 }
 
             }
-
+            stateObjects = stateObjects2D;
             GameObject env = GameObject.Find("Environment");
             QLearning qLearning = env.GetComponent<QLearning>();
             startStateCoords = qLearning.startStateCoords;
 
             MeshRenderer meshRenderer;
-            meshRenderer = stateObjects[startStateCoords[0], startStateCoords[1]].GetComponent<MeshRenderer>();
 
-            meshRenderer.material.color = Color.blue;
-            stateObjects[startStateCoords[0], startStateCoords[1]].tag = "StartState";
         }
         else
         {
             stateObjects = CreateStates(grid, statePoint);
             startStateCoords = PickSpawnPoint(stateObjects);
+            StartCoroutine(TagStates());
         }
 
-        StartCoroutine(TagStates());
+
 
         
 
