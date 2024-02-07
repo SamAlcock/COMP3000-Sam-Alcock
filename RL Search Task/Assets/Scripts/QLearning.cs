@@ -104,30 +104,23 @@ public class QLearning : MonoBehaviour
 
         if (gameObject.name.Contains("Clone"))
         {
-            GameObject[] stateObjects1D = new GameObject[grid.GetLength(0) * grid.GetLength(1)];
+
+            Debug.Log("Gameobject contains clone in name");
+            List<GameObject> stateObjects1D = new();
+
             for (int i = 0; i < transform.childCount; i++)
             {
                 GameObject child = transform.GetChild(i).gameObject;
 
                 if(child.tag == "StartState" || child.tag == "EmptyState" || child.tag == "RewardState" || child.tag == "InaccessibleState")
                 {
-                    for (int j = 0; j < transform.childCount; j++)
-                    {   
-                        GameObject childState = transform.GetChild(j).gameObject;
-                        if(childState.tag == "StartState" || childState.tag == "EmptyState" || childState.tag == "RewardState" || childState.tag == "InaccessibleState")
-                        {
-                            stateObjects1D[j] = childState;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }       
+                    stateObjects1D.Add(child);
+                    Debug.Log(System.String.Join(", ", stateObjects1D));
                 }
             }
             int idx = 0;
             GameObject[,] stateObjects2D = new GameObject[grid.GetLength(0), grid.GetLength(1)];
-            for (int x = 0; x < grid.GetLength(0); x++)
+            for (int x = 0; x < grid.GetLength(0); x++) // formatting for 2D array
             {
                 for (int z = 0; z < grid.GetLength(1); z++)
                 {
@@ -136,12 +129,13 @@ public class QLearning : MonoBehaviour
                 }
 
             }
+
             stateObjects = stateObjects2D;
             GameObject env = GameObject.Find("Environment");
             QLearning qLearning = env.GetComponent<QLearning>();
             startStateCoords = qLearning.startStateCoords;
 
-            MeshRenderer meshRenderer;
+            rewards = GetRewardMatrix(grid, stateObjects);
 
         }
         else
@@ -151,9 +145,9 @@ public class QLearning : MonoBehaviour
             StartCoroutine(TagStates());
         }
 
+        Debug.Log("Q-Learning output: " + stateObjects[0, 0]);
 
 
-        
 
         return grid;
 

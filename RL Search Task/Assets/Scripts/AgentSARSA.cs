@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,16 +29,17 @@ public class AgentSARSA : MonoBehaviour
         yield return new WaitUntil(() => environmentManager.isInitialised);
 
         GameObject env = GameObject.Find("Environment(Clone)");
-        QLearning qLearning = env.GetComponent<QLearning>();
-
-        yield return new WaitUntil(() => qLearning.isInitialised); // Wait until variables from QLearning.cs have been initialised
         
+
+        yield return new WaitUntil(() => env.GetComponent<QLearning>().isInitialised); // Wait until variables from QLearning.cs have been initialised
+        QLearning qLearning = env.GetComponent<QLearning>();
 
         int[,] rewardMatrix = qLearning.rewards;
         Vector3[,] grid = qLearning.grid;
         GameObject[,] stateObjects = qLearning.stateObjects;
-        float[,] qTable = qLearning.qTable;
 
+        float[,] qTable = qLearning.qTable;
+        
         int[] startPosition = GetAgentStartPosition(grid, stateObjects);
         
 
@@ -64,6 +66,7 @@ public class AgentSARSA : MonoBehaviour
         {
             for (int j = 0; j < stateObjects.GetLength(1); j++)
             {
+
                 Debug.Log("i = " + i + ", j = " + j);
                 if (stateObjects[i, j].CompareTag("StartState"))
                 {

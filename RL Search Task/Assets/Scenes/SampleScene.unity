@@ -908,7 +908,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   generation: 0
-  stepTime: 0.3
+  stepTime: 0.01
 --- !u!1 &1088370897
 GameObject:
   m_ObjectHideFlags: 0
@@ -942,7 +942,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   generation: 0
-  stepTime: 0.05
+  stepTime: 0.01
 --- !u!136 &1088370899
 CapsuleCollider:
   m_ObjectHideFlags: 0
