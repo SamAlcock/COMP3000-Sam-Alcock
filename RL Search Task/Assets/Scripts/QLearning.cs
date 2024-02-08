@@ -73,8 +73,6 @@ public class QLearning : MonoBehaviour
     }
     Vector3[,] GenerateStateGrid(GameObject statePoint, GameObject positiveMarker, GameObject negativeMarker)
     {
-
-
         // Calculate size of area using corner markers
         float widthX = positiveMarker.transform.position.x - negativeMarker.transform.position.x;
         float widthZ = positiveMarker.transform.position.z - negativeMarker.transform.position.z;
@@ -90,7 +88,8 @@ public class QLearning : MonoBehaviour
         grid = new Vector3[elementsX - 1, elementsZ - 1]; // create grid of dimensions elementsX - 1, elementsZ - 1 
 
         // Define initial coordinates, with an initial offset of xGap and zGap
-        Vector3 initialCoords = new(negativeMarker.transform.position.x + xGap, 0, negativeMarker.transform.position.z + zGap);
+        Vector3 initialCoords = new(negativeMarker.transform.position.x + xGap + gameObject.transform.position.x, 0, negativeMarker.transform.position.z + zGap + gameObject.transform.position.z);
+        Debug.Log("initialCoords = " + initialCoords.x + ", " + initialCoords.y + ", " + initialCoords.z);
 
         for (int x = 0; x < elementsX - 1; x++)
         {
@@ -105,7 +104,6 @@ public class QLearning : MonoBehaviour
         if (gameObject.name.Contains("Clone"))
         {
 
-            Debug.Log("Gameobject contains clone in name");
             List<GameObject> stateObjects1D = new();
 
             for (int i = 0; i < transform.childCount; i++)
@@ -115,7 +113,7 @@ public class QLearning : MonoBehaviour
                 if(child.tag == "StartState" || child.tag == "EmptyState" || child.tag == "RewardState" || child.tag == "InaccessibleState")
                 {
                     stateObjects1D.Add(child);
-                    Debug.Log(System.String.Join(", ", stateObjects1D));
+
                 }
             }
             int idx = 0;
@@ -145,7 +143,6 @@ public class QLearning : MonoBehaviour
             StartCoroutine(TagStates());
         }
 
-        Debug.Log("Q-Learning output: " + stateObjects[0, 0]);
 
 
 

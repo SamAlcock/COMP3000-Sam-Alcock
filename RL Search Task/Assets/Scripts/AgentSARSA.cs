@@ -12,7 +12,6 @@ public class AgentSARSA : MonoBehaviour
     /*
      Q-LEARNING AGENT
      - Check for valid moves
-       
      */
 
     float totalReward = 0.0f;
@@ -55,6 +54,8 @@ public class AgentSARSA : MonoBehaviour
 
     int GetCurrentReward(int[,] rewardMatrix, int[] currPosition)
     {
+        // currPosition going to -1 for some reason
+        Debug.Log("currPosition[0], currPosition[1] = " + currPosition[0] + ", " + currPosition[1]);
         return rewardMatrix[currPosition[0], currPosition[1]];
     }
 
@@ -67,7 +68,6 @@ public class AgentSARSA : MonoBehaviour
             for (int j = 0; j < stateObjects.GetLength(1); j++)
             {
 
-                Debug.Log("i = " + i + ", j = " + j);
                 if (stateObjects[i, j].CompareTag("StartState"))
                 {
 
@@ -78,7 +78,6 @@ public class AgentSARSA : MonoBehaviour
                 }
             }
         }
-        Debug.Log(string.Join(", ", startPosition) + " is the start position for SARSA Agent");
         return startPosition;
     }
     int[] GetCurrentPosition(Vector3[,] grid, GameObject[,] stateObjects)
@@ -104,8 +103,7 @@ public class AgentSARSA : MonoBehaviour
     List<string> GetValidActions(int[] currPosition, int[,] rewardMatrix)
     {
         List<string> validActions = new();
-        Debug.Log("currPosition[0] = " + currPosition[0]);
-        Debug.Log("rewardMatrix[currPosition[0] + 1, currPosition[1]] = " + rewardMatrix[currPosition[0] + 1, currPosition[1]]);
+
         if (currPosition[0] + 1 < rewardMatrix.GetLength(0) && rewardMatrix[currPosition[0] + 1, currPosition[1]] != -50)
         {
             validActions.Add("RIGHT");
@@ -122,7 +120,6 @@ public class AgentSARSA : MonoBehaviour
         {
             validActions.Add("UP");
         }
-        // Debug.Log("Valid actions: " + string.Join(", ", validActions));
         return validActions;
     }
     
@@ -167,7 +164,7 @@ public class AgentSARSA : MonoBehaviour
         generation++;
         StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable));
     }
-    (int[], string) MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid, float[,] qTable, int[,] rewardMatrix, string prevAction)
+    (int[], string) MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid, float[,] qTable, int[,] rewardMatrix, string prevAction) // negative currPosition values could be because of SARSA deciding future move before taking it
     {
 
         /*
@@ -236,8 +233,6 @@ public class AgentSARSA : MonoBehaviour
             currPosition[1]--;
             bestIdx = 3;
         }
-        
-        
 
         float gamma = 0.99f;
         float saReward = GetCurrentReward(rewardMatrix, currPosition);
@@ -245,13 +240,13 @@ public class AgentSARSA : MonoBehaviour
 
         float[] qValuesNew = new float[4];
         int qTableIdxNew = currPosition[0] * grid.GetLength(0) + currPosition[1];
-        qValuesNew = GetRelevantQValues(qTableIdxNew, qTable, qValuesNew, validMoves, potentialMoves);
+        List<string> newValidMoves = GetValidActions(currPosition, rewardMatrix);
+        qValuesNew = GetRelevantQValues(qTableIdxNew, qTable, qValuesNew, newValidMoves, potentialMoves);
         prevAction = GetNextPrevAction(qValuesNew);
         bestQValue = qValuesNew.Max();
         float nsReward = bestQValue;
 
         float qCurrentState = saReward + (gamma * nsReward);
-        Debug.Log("bestIdx = " + bestIdx);
         qValues[bestIdx] = qCurrentState;
 
         for (int i = 0; i < qValues.Length; i++)
@@ -304,6 +299,8 @@ public class AgentSARSA : MonoBehaviour
         {
             prevAction = "DOWN";
         }
+
+        Debug.Log("Next prevAction is " + prevAction + ", Q-Value is " + bestQValue);
         return prevAction;
     }
 }
