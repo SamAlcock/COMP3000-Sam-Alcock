@@ -47,9 +47,6 @@ public class QLearning : MonoBehaviour
                 negativeMarker = GameObject.Find("Marker --");
             }
         }
-
-        Renderer rend = positiveMarker.GetComponent<Renderer>();
-        rend.material.color = Color.blue;
         
         grid = GenerateStateGrid(statePoint, positiveMarker, negativeMarker);
         qTable = InitialiseQTable(grid);
