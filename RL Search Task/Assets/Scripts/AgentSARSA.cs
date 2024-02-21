@@ -54,8 +54,6 @@ public class AgentSARSA : MonoBehaviour
 
     int GetCurrentReward(int[,] rewardMatrix, int[] currPosition)
     {
-        // currPosition going to -1 for some reason
-        Debug.Log("currPosition[0], currPosition[1] = " + currPosition[0] + ", " + currPosition[1]);
         return rewardMatrix[currPosition[0], currPosition[1]];
     }
 
@@ -300,7 +298,6 @@ public class AgentSARSA : MonoBehaviour
             prevAction = "DOWN";
         }
 
-        Debug.Log("Next prevAction is " + prevAction + ", Q-Value is " + bestQValue);
         return prevAction;
     }
 }

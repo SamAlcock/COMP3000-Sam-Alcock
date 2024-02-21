@@ -14,6 +14,12 @@ public class EnvironmentManager : MonoBehaviour
         yield return new WaitUntil(() => qLearning.isInitialised); // Wait until variables from QLearning.cs have been initialised
         GameObject envSARSA = Instantiate(env, new Vector3(env.transform.position.x, env.transform.position.y, env.transform.position.z + 6), Quaternion.identity);
         envSARSA.tag = "envSARSA";
+
+        GameObject envHillclimber = Instantiate(env, new Vector3(env.transform.position.x + 6, env.transform.position.y, env.transform.position.z), Quaternion.identity);
+        envHillclimber.tag = "envHillclimber";
+        envHillclimber.name = "Environment Hillclimber";
+
+
         QLearning sarsa = envSARSA.GetComponent<QLearning>();
         yield return new WaitUntil(() => sarsa.isInitialised);
         isInitialised = true;
