@@ -13,6 +13,7 @@ TagManager:
   - QLAgent
   - envSARSA
   - envQL
+  - envHillclimber
   layers:
   - Default
   - TransparentFX

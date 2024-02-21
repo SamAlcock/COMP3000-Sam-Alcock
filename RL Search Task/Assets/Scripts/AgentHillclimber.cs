@@ -1,16 +1,18 @@
+using Mono.Reflection;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Transactions;
 using System.Xml.Schema;
 using UnityEngine;
 
 public class AgentHillclimber : MonoBehaviour
 {
+    [SerializeField] float stepTime = 0.05f;
 
-      
 
     IEnumerator Start()
     {
@@ -31,9 +33,8 @@ public class AgentHillclimber : MonoBehaviour
 
         int[] startPosition = GetAgentStartPosition(grid, stateObjects);
 
-        Hillclimber hillclimber = new();
-
-        hillclimber.Hillclimb(50, startPosition, grid, rewardMatrix); // Increase to get more chance to mutate
+        Debug.Log("Starting Hillclimber coroutine");
+        StartCoroutine(Hillclimb(startPosition, grid, rewardMatrix)); // Increase to get more chance to mutate
 
 
     }
@@ -58,160 +59,171 @@ public class AgentHillclimber : MonoBehaviour
         return startPosition;
     }
 
+    int numOfInputs = 4;
+    int numOfInstructions = 250;
+
+    public List<int> GenerateSolution() // Generate a random array of inputs
+    {
+        List<int> instructions = new();
+        System.Random rand = new();
+
+        for (int i = 0; i < numOfInstructions; i++)
+        {
+            instructions.Add(rand.Next(0, numOfInputs)); // maybe add something to ensure agent doesn't go back on itself
+        }
+
+        return instructions;
+    }
+
+    public List<int> SessionReplace(int numOfInstructions, List<int> parent) // Swap mutation?
+    {
+        System.Random rand = new();
+
+        List<int> child = new List<int>(parent);
+
+        for (int i = 0; i < 1; i++) // May need to specify that it has to be a different swap
+        {
+            int location = rand.Next(0, child.Count);
+
+            child[location] = rand.Next(0, 4); // Pick number from 1 to 3 (each number relates to a direction)
+        }
+
+
+        return child;
+    }
+
+    public IEnumerator Hillclimb(int[] startPosition, Vector3[,] grid, int[,] rewardMatrix)
+    {
+        /* 
+            * HILLCLIMBER 
+            * - Compare child and parent fittness
+            * - Best fittness becomes next parent
+            */
+
         
-    class Solution
-    {
-        int numOfInputs = 4;
-        int numOfInstructions = 250;
 
-        public List<int> GenerateSolution() // Generate a random array of inputs
+        Debug.Log("Initialising...");
+        bool running = true;
+        int generation = 0;
+        gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put agent into start position
+        int[] currPosition = (int[])startPosition.Clone();
+
+        // Initialise random solution
+        List<int> parentInstructions = GenerateSolution();
+
+        // Agent needs to move here and get rewards for initial instructions
+        int parentReward = GetCurrentReward(rewardMatrix, currPosition);
+        int childReward = 0;
+
+        // Loop for Niter 
+        while(running)
         {
-            List<int> instructions = new();
-            System.Random rand = new();
+            // Mutate
+            List<int> childInstructions = SessionReplace(parentInstructions.Count, parentInstructions);
 
-            for (int i = 0; i < numOfInstructions; i++)
+            // Agent needs to move here, and then get rewards for instructions performed
+            for (int i = 0; i < 100; i++)
             {
-                instructions.Add(rand.Next(0, numOfInputs)); // maybe add something to ensure agent doesn't go back on itself
+                currPosition = MakeMove(childInstructions[i], grid, currPosition, rewardMatrix);
+                yield return new WaitForSeconds(stepTime);
+                gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
+
+                // Evaluate
+                childReward += GetCurrentReward(rewardMatrix, currPosition);
             }
-
-            return instructions;
-        }
-        public double FindConstraints(List<int> instructions)
-        {
-            // This function will calculate the fitness/reward for this generation
-            int score = 0;
-           
-
-
-
-
-
-                
-
-            return score;
-        }
-
-
-
-    }
-    class Mutate
-    {
-
-        public List<int> SessionReplace(int numOfInstructions, List<int> parent) // Swap mutation?
-        {
-            System.Random rand = new();
-
-            List<int> child = new List<int>(parent);
-
-            for (int i = 0; i < 1; i++) // May need to specify that it has to be a different swap
-            {
-                int location = rand.Next(0, child.Count);
-
-                if (child[location] == 0) // Needs to be switched to a random number between 1-4
-                {
-                    child[location] = 1;
-                }
-                else
-                {
-                    child[location] = 0;
-                }
-            }
-
-
-            return child;
-        }
-
-    }
-
-    public class Hillclimber : MonoBehaviour
-    {
-        [SerializeField] float stepTime = 0.05f;
-        public IEnumerator Hillclimb(int Niter, int[] startPosition, Vector3[,] grid, int[,] rewardMatrix)
-        {
-            /* 
-                * HILLCLIMBER 
-                * - Compare child and parent fittness
-                * - Best fittness becomes next parent
-                */
-
-            Solution solution = new();
-            Mutate mutate = new();
-
-            Debug.Log("Initialising...");
-            bool running = true;
-            int generation = 0;
-            gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put agent into start position
-            int[] currPosition = (int[])startPosition.Clone();
-
-            // Initialise random solution
-            List<int> parentInstructions = solution.GenerateSolution();
-
-            // Agent needs to move here and get rewards for initial instructions
-            int parentReward = GetCurrentReward(rewardMatrix, currPosition);
-            int childReward = 0;
-
-            // Loop for Niter 
-            while(running)
-            {
-                // Mutate
-                List<int> childInstructions = mutate.SessionReplace(parentInstructions.Count, parentInstructions);
-
-                // Agent needs to move here, and then get rewards for instructions performed
-                for (int i = 0; i < 100; i++)
-                {
-                    currPosition = MakeMove(childInstructions[i], grid, currPosition);
-                    yield return new WaitForSeconds(stepTime);
-                    gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
-
-                    // Evaluate
-                    childReward += GetCurrentReward(rewardMatrix, currPosition);
-                }
                     
 
-                // Pick the next parent
-                if (childReward > parentReward)
-                {
-                    parentInstructions = childInstructions.ToList();
-                    parentReward = childReward;
+            // Pick the next parent
+            if (childReward > parentReward)
+            {
+                parentInstructions = childInstructions.ToList();
+                parentReward = childReward;
 
-                    Debug.Log("Generation: " + generation + ", New best reward: " + parentReward);
-                }
-                generation++;
+                Debug.Log("Generation: " + generation + ", New best reward: " + parentReward);
             }
-
-            Debug.Log("Inputs: " + String.Join(", ", parentInstructions));
-
-
+            generation++;
         }
-        int GetCurrentReward(int[,] rewardMatrix, int[] currPosition)
+
+        Debug.Log("Inputs: " + String.Join(", ", parentInstructions));
+
+
+    }
+    int GetCurrentReward(int[,] rewardMatrix, int[] currPosition)
+    {
+        return rewardMatrix[currPosition[0], currPosition[1]];
+    }
+
+    int[] MakeMove(int instruction, Vector3[,] grid, int[] currPosition, int[,] rewardMatrix)
+    {
+        // Need to check if move is valid 
+        bool valid;
+        int[] potentialPosition = currPosition;
+        potentialPosition = DetermineMovement(potentialPosition, instruction);
+        valid = ValidMove(potentialPosition, instruction, grid, rewardMatrix);
+
+        if (!valid)
         {
-            return rewardMatrix[currPosition[0], currPosition[1]];
+            Debug.Log("Invalid move");
+            System.Random rand = new();
+            int newInstruction = instruction;
+            while (newInstruction == instruction && !valid)
+            {
+                potentialPosition = currPosition;
+                newInstruction = rand.Next(0, 4);
+                potentialPosition = DetermineMovement(potentialPosition, instruction);
+                valid = ValidMove(potentialPosition, instruction, grid, rewardMatrix);
+            }
+            currPosition = DetermineMovement(currPosition, newInstruction);
         }
-
-        int[] MakeMove(int instruction, Vector3[,] grid, int[] currPosition)
+        else
         {
-            if (instruction == 0) // Left
-            {
-                currPosition[0]--;
-            }
-            else if (instruction == 1) // Right
-            {
-                currPosition[0]++;
-            }
-            else if (instruction == 2) // Up
-            {
-                currPosition[1]++;
-            }
-            else // Down
-            {
-                currPosition[1]--;
-            }
-
-            return currPosition;
+            currPosition = potentialPosition;
         }
+
+        return currPosition;
+    }
+    
+    bool ValidMove(int[] potentialPosition, int instruction, Vector3[,] grid, int[,] rewardMatrix)
+    {
+        /*
+         * Position is invalid if
+         * Inside obstacle
+         * Outside bounds
+         * 
+         * Change position by 
+         * opposite direction? - easier, but will increase number of times agent goes back on itself
+         * new random direction - harder, but will allow for better solutions
+         */
+
+
+        if (potentialPosition[0] >= grid.GetLength(0) || potentialPosition[0] < grid.GetLength(0) || potentialPosition[1] >= grid.GetLength(1) || potentialPosition[1] < grid.GetLength(1) || GetCurrentReward(rewardMatrix, potentialPosition) == -50) // if potential position would be out of bounds or inside an obstacle
+        {
+            return false;
+            
+        }
+        return true;
+    }
+
+    int[] DetermineMovement(int[] pos, int instruction)
+    {
+        if (instruction == 0) // Left
+        {
+            pos[0]--;
+        }
+        else if (instruction == 1) // Right
+        {
+            pos[0]++;
+        }
+        else if (instruction == 2) // Up
+        {
+            pos[1]++;
+        }
+        else // Down
+        {
+            pos[1]--;
+        }
+        return pos;
     }
 
     
-
-
 }
