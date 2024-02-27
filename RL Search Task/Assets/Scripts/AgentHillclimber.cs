@@ -120,7 +120,7 @@ public class AgentHillclimber : MonoBehaviour
         {
             // Mutate
             List<int> childInstructions = SessionReplace(parentInstructions.Count, parentInstructions);
-
+            gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put agent into start position
             // Agent needs to move here, and then get rewards for instructions performed
             for (int i = 0; i < 100; i++)
             {
@@ -133,12 +133,12 @@ public class AgentHillclimber : MonoBehaviour
 
                 if (rewardMatrix[currPosition[0], currPosition[1]] == 50)
                 {
-                    Debug.Log("Generation: " + generation + ", reached reward state! Total reward = " + childReward);
+                    Debug.Log("Hillclimber Generation: " + generation + ", reached reward state! Total reward = " + childReward);
                     break;
                 }
-                else if (i == 100)
+                else if (i == 99)
                 {
-                    Debug.Log("Generation: " + generation + ", maximum steps for single iteration reached. Total reward = " + childReward);
+                    Debug.Log("Hillclimber Generation: " + generation + ", maximum steps for single iteration reached. Total reward = " + childReward);
                     break;
                 }
                 Debug.Log("i = " + i);
