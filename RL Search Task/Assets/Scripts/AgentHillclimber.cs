@@ -124,12 +124,24 @@ public class AgentHillclimber : MonoBehaviour
             // Agent needs to move here, and then get rewards for instructions performed
             for (int i = 0; i < 100; i++)
             {
-                currPosition = MakeMove(childInstructions[i], grid, currPosition, rewardMatrix);
+                currPosition = MakeMove(childInstructions[i], grid, currPosition, rewardMatrix, i, childInstructions);
                 yield return new WaitForSeconds(stepTime);
                 gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
 
                 // Evaluate
                 childReward += GetCurrentReward(rewardMatrix, currPosition);
+
+                if (rewardMatrix[currPosition[0], currPosition[1]] == 50)
+                {
+                    Debug.Log("Generation: " + generation + ", reached reward state! Total reward = " + childReward);
+                    break;
+                }
+                else if (i == 100)
+                {
+                    Debug.Log("Generation: " + generation + ", maximum steps for single iteration reached. Total reward = " + childReward);
+                    break;
+                }
+                Debug.Log("i = " + i);
             }
                     
 
@@ -139,12 +151,12 @@ public class AgentHillclimber : MonoBehaviour
                 parentInstructions = childInstructions.ToList();
                 parentReward = childReward;
 
-                Debug.Log("Generation: " + generation + ", New best reward: " + parentReward);
+                Debug.Log("Hillclimber Generation: " + generation + ", New best reward: " + parentReward);
             }
             generation++;
         }
 
-        Debug.Log("Inputs: " + String.Join(", ", parentInstructions));
+        Debug.Log("Hillclimber Inputs: " + String.Join(", ", parentInstructions));
 
 
     }
@@ -153,46 +165,46 @@ public class AgentHillclimber : MonoBehaviour
         return rewardMatrix[currPosition[0], currPosition[1]];
     }
 
-    int[] MakeMove(int instruction, Vector3[,] grid, int[] currPosition, int[,] rewardMatrix)
+    int[] MakeMove(int instruction, Vector3[,] grid, int[] currPosition, int[,] rewardMatrix, int iteration, List<int> allInstructions)
     {
-        // Need to check if move is valid 
-        bool valid;
-        int[] potentialPosition = currPosition;
-        potentialPosition = DetermineMovement(potentialPosition, instruction);
-        valid = ValidMove(potentialPosition, grid, rewardMatrix);
+        System.Random rand = new();
+        List<int> validInstructions = GetValidActions(currPosition, rewardMatrix);
 
-        if (!valid)
+        if (!validInstructions.Contains(instruction))
         {
-            Debug.Log("Invalid move");
-            System.Random rand = new();
-            int newInstruction = instruction;
-            while (!valid)
-            {
-                potentialPosition = currPosition;
-                newInstruction = rand.Next(0, 4);
-                Debug.Log("newInstruction = " + newInstruction);
-                potentialPosition = DetermineMovement(potentialPosition, newInstruction);
-                valid = ValidMove(potentialPosition, grid, rewardMatrix);
+            int newInstructionIdx = rand.Next(0, validInstructions.Count);
+            instruction = validInstructions[newInstructionIdx];
+            allInstructions[iteration] = instruction;
+        }
 
-            }
-            currPosition = potentialPosition;
-        }
-        else
-        {
-            currPosition = potentialPosition;
-        }
+        currPosition = DetermineMovement(currPosition, instruction);
+
 
         return currPosition;
     }
-    
-    bool ValidMove(int[] potentialPosition, Vector3[,] grid, int[,] rewardMatrix)
+
+    List<int> GetValidActions(int[] currPosition, int[,] rewardMatrix)
     {
-        // if movement would be out of bounds, or in obstacle
-        if (potentialPosition[0] >= grid.GetLength(0) || potentialPosition[0] < 0 || potentialPosition[1] >= grid.GetLength(1) || potentialPosition[1] < 0 || GetCurrentReward(rewardMatrix, potentialPosition) == -50) // if potential position would be out of bounds or inside an obstacle
+        List<int> validActions = new();
+
+        if (currPosition[0] + 1 < rewardMatrix.GetLength(0) && rewardMatrix[currPosition[0] + 1, currPosition[1]] != -50)
         {
-            return false;
+            validActions.Add(1);
         }
-        return true;
+        if (currPosition[0] - 1 >= 0 && rewardMatrix[currPosition[0] - 1, currPosition[1]] != -50)
+        {
+            validActions.Add(0);
+        }
+        if (currPosition[1] - 1 >= 0 && rewardMatrix[currPosition[0], currPosition[1] - 1] != -50)
+        {
+            validActions.Add(3);
+        }
+        if (currPosition[1] + 1 < rewardMatrix.GetLength(1) && rewardMatrix[currPosition[0], currPosition[1] + 1] != -50)
+        {
+            validActions.Add(2);
+        }
+        Debug.Log("Hillclimber valid actions: " + string.Join(", ", validActions));
+        return validActions;
     }
 
     int[] DetermineMovement(int[] pos, int instruction)
