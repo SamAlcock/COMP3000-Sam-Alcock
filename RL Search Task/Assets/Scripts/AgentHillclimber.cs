@@ -159,21 +159,23 @@ public class AgentHillclimber : MonoBehaviour
         bool valid;
         int[] potentialPosition = currPosition;
         potentialPosition = DetermineMovement(potentialPosition, instruction);
-        valid = ValidMove(potentialPosition, instruction, grid, rewardMatrix);
+        valid = ValidMove(potentialPosition, grid, rewardMatrix);
 
         if (!valid)
         {
             Debug.Log("Invalid move");
             System.Random rand = new();
             int newInstruction = instruction;
-            while (newInstruction == instruction && !valid)
+            while (!valid)
             {
                 potentialPosition = currPosition;
                 newInstruction = rand.Next(0, 4);
-                potentialPosition = DetermineMovement(potentialPosition, instruction);
-                valid = ValidMove(potentialPosition, instruction, grid, rewardMatrix);
+                Debug.Log("newInstruction = " + newInstruction);
+                potentialPosition = DetermineMovement(potentialPosition, newInstruction);
+                valid = ValidMove(potentialPosition, grid, rewardMatrix);
+
             }
-            currPosition = DetermineMovement(currPosition, newInstruction);
+            currPosition = potentialPosition;
         }
         else
         {
@@ -183,23 +185,12 @@ public class AgentHillclimber : MonoBehaviour
         return currPosition;
     }
     
-    bool ValidMove(int[] potentialPosition, int instruction, Vector3[,] grid, int[,] rewardMatrix)
+    bool ValidMove(int[] potentialPosition, Vector3[,] grid, int[,] rewardMatrix)
     {
-        /*
-         * Position is invalid if
-         * Inside obstacle
-         * Outside bounds
-         * 
-         * Change position by 
-         * opposite direction? - easier, but will increase number of times agent goes back on itself
-         * new random direction - harder, but will allow for better solutions
-         */
-
-
-        if (potentialPosition[0] >= grid.GetLength(0) || potentialPosition[0] < grid.GetLength(0) || potentialPosition[1] >= grid.GetLength(1) || potentialPosition[1] < grid.GetLength(1) || GetCurrentReward(rewardMatrix, potentialPosition) == -50) // if potential position would be out of bounds or inside an obstacle
+        // if movement would be out of bounds, or in obstacle
+        if (potentialPosition[0] >= grid.GetLength(0) || potentialPosition[0] < 0 || potentialPosition[1] >= grid.GetLength(1) || potentialPosition[1] < 0 || GetCurrentReward(rewardMatrix, potentialPosition) == -50) // if potential position would be out of bounds or inside an obstacle
         {
             return false;
-            
         }
         return true;
     }
