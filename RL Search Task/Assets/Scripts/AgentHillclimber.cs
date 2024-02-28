@@ -33,7 +33,6 @@ public class AgentHillclimber : MonoBehaviour
 
         int[] startPosition = GetAgentStartPosition(grid, stateObjects);
 
-        Debug.Log("Starting Hillclimber coroutine");
         StartCoroutine(Hillclimb(startPosition, grid, rewardMatrix)); // Increase to get more chance to mutate
 
 
@@ -102,26 +101,27 @@ public class AgentHillclimber : MonoBehaviour
 
         
 
-        Debug.Log("Initialising...");
         bool running = true;
         int generation = 0;
         gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put agent into start position
-        int[] currPosition = (int[])startPosition.Clone();
+        
 
         // Initialise random solution
         List<int> parentInstructions = GenerateSolution();
 
         // Agent needs to move here and get rewards for initial instructions
-        int parentReward = GetCurrentReward(rewardMatrix, currPosition);
-        int childReward = 0;
+        int parentReward = 0;
+        
 
         // Loop for Niter 
         while(running)
         {
+            int childReward = 0;
             // Mutate
             List<int> childInstructions = SessionReplace(parentInstructions.Count, parentInstructions);
             gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put agent into start position
             // Agent needs to move here, and then get rewards for instructions performed
+            int[] currPosition = (int[])startPosition.Clone();
             for (int i = 0; i < 100; i++)
             {
                 currPosition = MakeMove(childInstructions[i], grid, currPosition, rewardMatrix, i, childInstructions);
@@ -141,7 +141,6 @@ public class AgentHillclimber : MonoBehaviour
                     Debug.Log("Hillclimber Generation: " + generation + ", maximum steps for single iteration reached. Total reward = " + childReward);
                     break;
                 }
-                Debug.Log("i = " + i);
             }
                     
 
@@ -154,9 +153,10 @@ public class AgentHillclimber : MonoBehaviour
                 Debug.Log("Hillclimber Generation: " + generation + ", New best reward: " + parentReward);
             }
             generation++;
+            Debug.Log("Hillclimber Inputs: " + String.Join(", ", parentInstructions));
         }
 
-        Debug.Log("Hillclimber Inputs: " + String.Join(", ", parentInstructions));
+        
 
 
     }

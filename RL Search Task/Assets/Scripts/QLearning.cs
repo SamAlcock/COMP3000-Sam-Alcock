@@ -98,7 +98,7 @@ public class QLearning : MonoBehaviour
 
         
 
-        if (gameObject.name.Contains("Clone"))
+        if (gameObject.name != "Environment")
         {
 
             List<GameObject> stateObjects1D = new();
@@ -185,6 +185,7 @@ public class QLearning : MonoBehaviour
 
             meshRenderer.material.color = Color.blue;
             stateObjects[x, z].tag = "StartState";
+            Debug.Log("Picked start state");
         }
         int[] startCoords = new int[2] { x, z };
         return startCoords;
