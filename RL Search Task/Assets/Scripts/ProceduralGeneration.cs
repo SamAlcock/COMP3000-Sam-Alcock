@@ -45,9 +45,11 @@ public class ProceduralGeneration : MonoBehaviour
             List<GameObject> obstacles = ObstaclesToList();
 
             Debug.Log("Amount of obstacles in area: " + obstacles.Count);
+
+
         }
 
-        
+
     }
     Vector3[,] GenerateGrid(GameObject positiveMarker, GameObject negativeMarker)
     {
@@ -280,6 +282,8 @@ public class ProceduralGeneration : MonoBehaviour
         chunk6.SetActive(false);
         chunk7.SetActive(false);
         chunk8.SetActive(false);
+
+
 
         GameObject env = GameObject.Find("Environment");
 

@@ -55,7 +55,7 @@ public class StatePoint : MonoBehaviour
                 lerpNum = numCollisions / generation;
             }
 
-            Color lerpedColor = Color.Lerp(Color.red, Color.white, lerpNum * 4);
+            Color lerpedColor = Color.Lerp(new Color(236f/255f, 236f/255f, 236f/255f), Color.red, lerpNum * 4);
             MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
             meshRenderer.material.color = lerpedColor;
         }

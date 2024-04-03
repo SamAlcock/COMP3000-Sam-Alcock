@@ -53,6 +53,7 @@ public class QLearning : MonoBehaviour
 
         //isInitialised = true;
 
+
     }
     float[,] InitialiseQTable(Vector3[,] grid)
     {
