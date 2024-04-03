@@ -12,7 +12,7 @@ using UnityEngine;
 public class AgentHillclimber : MonoBehaviour
 {
     [SerializeField] float stepTime = 0.05f;
-
+    public int generation = 0;
 
     IEnumerator Start()
     {
@@ -102,7 +102,7 @@ public class AgentHillclimber : MonoBehaviour
         
 
         bool running = true;
-        int generation = 0;
+        // int generation = 0;
         gameObject.transform.position = new Vector3(grid[startPosition[0], startPosition[1]].x, 0.2f, grid[startPosition[0], startPosition[1]].z); // Put agent into start position
         
 

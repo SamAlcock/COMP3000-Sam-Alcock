@@ -9,16 +9,23 @@ public class StatePoint : MonoBehaviour
     float numCollisions = 0;
     int generation;
     AgentQLearning agentQLearning;
+    AgentSARSA agentSARSA;
+    AgentHillclimber agentHillclimber;
     private void Start()
     {
         GameObject agentQL = GameObject.Find("QLAgent");
         agentQLearning = agentQL.GetComponent<AgentQLearning>();
-        
-        InvokeRepeating("StateHeat", 2f, 1f);
+
+        GameObject agentSarsa = GameObject.Find("SARSAAgent");
+        agentSARSA = agentSarsa.GetComponent<AgentSARSA>();
+
+        GameObject agentHC = GameObject.Find("HillclimberAgent");
+        agentHillclimber = agentHC.GetComponent<AgentHillclimber>();
+        InvokeRepeating("StateHeat", 2f, 0.5f);
     }
     private void Update()
     {
-        generation = agentQLearning.generation;
+
     }
     private void OnCollisionEnter(Collision collision)
     {
@@ -39,12 +46,25 @@ public class StatePoint : MonoBehaviour
         {
             numCollisions++;
         }
+
     }
 
     void StateHeat()
     {
         if (gameObject.tag == "EmptyState")
         {
+            if (transform.parent.tag == "envQL")
+            {
+                generation = agentQLearning.generation;
+            }
+            else if (transform.parent.tag == "envSARSA")
+            {
+                generation = agentSARSA.generation;
+            }
+            else if (transform.parent.tag == "envHillclimber")
+            {
+                generation = agentHillclimber.generation;
+            }
             float lerpNum = 0;
             if (generation == 0)
             {
