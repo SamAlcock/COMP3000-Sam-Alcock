@@ -182,7 +182,12 @@ public class AgentSARSA : MonoBehaviour
         float bestQValue = qValues.Max();
         int bestIdx = -1;
 
-        if (prevAction == null)
+        int random = UnityEngine.Random.Range(0, 20);
+        if (random == 0) // Exploration
+        {
+            bestIdx = Explore(qValues);
+        }
+        else if (prevAction == null)
         {
 
             for (int i = 0; i < qValues.Length; i++)
@@ -299,5 +304,17 @@ public class AgentSARSA : MonoBehaviour
         }
 
         return prevAction;
+    }
+    int Explore(float[] qValues)
+    {
+        int bestIdx = UnityEngine.Random.Range(0, qValues.Length);
+
+        if (qValues[bestIdx] <= -50000)
+        {
+            bestIdx = Explore(qValues);
+        }
+
+        return bestIdx;
+
     }
 }

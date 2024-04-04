@@ -153,7 +153,6 @@ public class AgentHillclimber : MonoBehaviour
                 Debug.Log("Hillclimber Generation: " + generation + ", New best reward: " + parentReward);
             }
             generation++;
-            Debug.Log("Hillclimber Inputs: " + String.Join(", ", parentInstructions));
         }
 
         
@@ -203,7 +202,6 @@ public class AgentHillclimber : MonoBehaviour
         {
             validActions.Add(2);
         }
-        Debug.Log("Hillclimber valid actions: " + string.Join(", ", validActions));
         return validActions;
     }
 

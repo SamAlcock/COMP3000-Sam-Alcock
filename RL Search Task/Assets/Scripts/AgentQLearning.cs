@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -179,14 +180,25 @@ public class AgentQLearning : MonoBehaviour
         float bestQValue = qValues.Max();
         int bestIdx = -1;
 
-        for (int i = 0; i < qValues.Length; i++)
+        int random = Random.Range(0, 20);
+
+
+        if (random == 0) // Exploration
         {
-            if (bestQValue == qValues[i])
+            bestIdx = Explore(qValues);
+        }
+        else
+        {
+            for (int i = 0; i < qValues.Length; i++)
             {
-                bestIdx = i; // This is the index value of the chosen move
+                if (bestQValue == qValues[i])
+                {
+                    bestIdx = i; // This is the index value of the chosen move
+                }
             }
         }
 
+        
         if (bestIdx == 0) // Left
         {
             currPosition[0]--;
@@ -237,5 +249,17 @@ public class AgentQLearning : MonoBehaviour
             }
         }
         return qValues;
+    }
+    int Explore(float[] qValues)
+    {
+        int bestIdx = Random.Range(0, qValues.Length);
+
+        if (qValues[bestIdx] <= -50000)
+        {
+            bestIdx = Explore(qValues);
+        }
+
+        return bestIdx;
+
     }
 }
