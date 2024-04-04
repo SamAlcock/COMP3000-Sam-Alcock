@@ -155,7 +155,16 @@ public class AgentQLearning : MonoBehaviour
                 break;
             }
         }
+
+        GameObject master = GameObject.Find("Master");
+
+        CSVManager csvManager = master.GetComponent<CSVManager>();
+        string[] data = { "Q-Learning", generation.ToString(), totalReward.ToString() };
+        csvManager.CSVWrite(data, "QLearningOutput.csv");
+        Debug.Log("Data written to .csv");
+
         generation++;
+        totalReward = 0;
         StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable));
     }
     int[] MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid, float[,] qTable, int[,] rewardMatrix)
@@ -219,15 +228,16 @@ public class AgentQLearning : MonoBehaviour
         float saReward = GetCurrentReward(rewardMatrix, currPosition);
         totalReward += saReward;
 
+        
+
+
         float[] qValuesNew = new float[4];
         int qTableIdxNew = currPosition[0] * grid.GetLength(0) + currPosition[1];
         qValuesNew = GetRelevantQValues(qTableIdxNew, qTable, qValuesNew, validMoves, potentialMoves);
         bestQValue = qValuesNew.Max();
         float nsReward = bestQValue;
         float qCurrentState = saReward + (gamma * nsReward);
-        // Debug.Log("qCurrentState = " + qCurrentState);
         qValues[bestIdx] = qCurrentState;
-        //Debug.Log("Q-Value for this state = " + qCurrentState);
 
         for (int i = 0; i < qValues.Length; i++)
         {
