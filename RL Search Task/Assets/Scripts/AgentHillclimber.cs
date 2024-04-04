@@ -32,7 +32,7 @@ public class AgentHillclimber : MonoBehaviour
         Vector3[,] grid = qLearning.grid;
         GameObject[,] stateObjects = qLearning.stateObjects;
 
-        int[] startPosition = GetAgentStartPosition(grid, stateObjects);
+        int[] startPosition = qLearning.startStateCoords;
 
         StartCoroutine(Hillclimb(startPosition, grid, rewardMatrix)); // Increase to get more chance to mutate
 

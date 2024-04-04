@@ -39,7 +39,7 @@ public class AgentSARSA : MonoBehaviour
 
         float[,] qTable = qLearning.qTable;
         
-        int[] startPosition = GetAgentStartPosition(grid, stateObjects);
+        int[] startPosition = qLearning.startStateCoords;
         
 
         TrainAgent(1, startPosition, rewardMatrix, grid, qTable);

@@ -34,7 +34,7 @@ public class AgentQLearning : MonoBehaviour
         GameObject[,] stateObjects = qLearning.stateObjects;
         float[,] qTable = qLearning.qTable;
 
-        int[] startPosition = GetAgentStartPosition(grid, stateObjects);
+        int[] startPosition = qLearning.startStateCoords;
         
 
         TrainAgent(1, startPosition, rewardMatrix, grid, qTable);
@@ -66,7 +66,7 @@ public class AgentQLearning : MonoBehaviour
             {
                 if (stateObjects[i, j].CompareTag("StartState"))
                 {
-
+                    Debug.Log("StartState found");
                     startPosition[0] = i;
                     startPosition[1] = j;
 
