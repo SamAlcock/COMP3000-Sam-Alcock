@@ -8,6 +8,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Transactions;
 using System.Xml.Schema;
 using UnityEngine;
+using UnityEngine.Timeline;
 
 public class AgentHillclimber : MonoBehaviour
 {
@@ -145,13 +146,21 @@ public class AgentHillclimber : MonoBehaviour
                     
 
             // Pick the next parent
-            if (childReward > parentReward)
+            if (childReward > parentReward || generation == 0)
             {
                 parentInstructions = childInstructions.ToList();
                 parentReward = childReward;
 
                 Debug.Log("Hillclimber Generation: " + generation + ", New best reward: " + parentReward);
             }
+
+            GameObject master = GameObject.Find("Master");
+
+            CSVManager csvManager = master.GetComponent<CSVManager>();
+            string[] data = { "Hill-climber", generation.ToString(), parentReward.ToString() };
+            csvManager.CSVWrite(data, "HillclimberOutput.csv");
+            Debug.Log("Data written to .csv");
+                
             generation++;
         }
 

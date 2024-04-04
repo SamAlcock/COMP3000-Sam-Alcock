@@ -159,7 +159,14 @@ public class AgentSARSA : MonoBehaviour
                 break;
             }
         }
+        GameObject master = GameObject.Find("Master");
+
+        CSVManager csvManager = master.GetComponent<CSVManager>();
+        string[] data = { "SARSA", generation.ToString(), totalReward.ToString() };
+        csvManager.CSVWrite(data, "SARSAOutput.csv");
+        Debug.Log("Data written to .csv");
         generation++;
+        totalReward = 0;
         StartCoroutine(StartEpisode(startPosition, rewardMatrix, grid, qTable));
     }
     (int[], string) MakeMove(int[] currPosition, List<string> validMoves, Vector3[,] grid, float[,] qTable, int[,] rewardMatrix, string prevAction) // negative currPosition values could be because of SARSA deciding future move before taking it
