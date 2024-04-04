@@ -6,13 +6,12 @@ using System;
 public class TargetPlacing : MonoBehaviour
 {
     TargetCollision targetCollision;
-
     public bool targetsPlaced;
     // Start is called before the first frame update
     void Start()
     {
         int numTargets = 1;
-
+        
         GameObject target = GameObject.Find("Target");
         if (gameObject.name == "Environment"){
             PlaceTargets(numTargets, target); 
@@ -53,7 +52,15 @@ public class TargetPlacing : MonoBehaviour
     }
     bool InBadPosition(Vector3 position)
     {
+        GameObject[] startState = GameObject.FindGameObjectsWithTag("StartState");
+       
+        if (Math.Sqrt((startState[0].transform.position.z - startState[0].transform.position.x) * (startState[0].transform.position.z - startState[0].transform.position.x) + (position.x - position.z) * (position.x - position.z)) < 5)
+        {
+            return true;
+        }
+
         Collider[] collisions = Physics.OverlapSphere(position, 0.2f);
+        
         foreach(Collider collision in collisions)
         {
             if (collision.CompareTag("Obstacle") || collision.CompareTag("InaccessibleState"))
