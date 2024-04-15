@@ -146,7 +146,7 @@ public class AgentHillclimber : MonoBehaviour
                     
 
             // Pick the next parent
-            if (childReward > parentReward || generation == 0)
+            if (childReward >= parentReward || generation == 0)
             {
                 parentInstructions = childInstructions.ToList();
                 parentReward = childReward;
@@ -216,23 +216,32 @@ public class AgentHillclimber : MonoBehaviour
 
     int[] DetermineMovement(int[] pos, int instruction)
     {
+        int rotation = 0;
         if (instruction == 0) // Left
         {
             pos[0]--;
+            rotation = -90;
         }
         else if (instruction == 1) // Right
         {
             pos[0]++;
+            rotation = 90;
         }
         else if (instruction == 2) // Up
         {
             pos[1]++;
+            rotation = 0;
         }
         else // Down
         {
             pos[1]--;
+            rotation = 180;
         }
+
+        gameObject.transform.eulerAngles = new Vector3(0f, rotation, 0f);
         return pos;
+
+        
     }
 
     

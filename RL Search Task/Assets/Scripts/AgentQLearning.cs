@@ -178,7 +178,7 @@ public class AgentQLearning : MonoBehaviour
          * - If invalid, set it to -1 in Q-Table
          * - If valid, take action and update Q-Table with results
          */
-
+        int rotation = 0;
         List<string> potentialMoves = new() { "LEFT", "RIGHT", "UP", "DOWN" };
 
         float[] qValues = new float[4];
@@ -211,18 +211,22 @@ public class AgentQLearning : MonoBehaviour
         if (bestIdx == 0) // Left
         {
             currPosition[0]--;
+            rotation = -90;
         }
         else if (bestIdx == 1) // Right
         {
             currPosition[0]++;
+            rotation = 90;
         }
         else if (bestIdx == 2) // Up
         {
             currPosition[1]++;
+            rotation = 0;
         }
         else if (bestIdx == 3) // Down
         {
             currPosition[1]--;
+            rotation = 180;
         }
         float gamma = 0.99f;
         float saReward = GetCurrentReward(rewardMatrix, currPosition);
@@ -245,6 +249,7 @@ public class AgentQLearning : MonoBehaviour
         }
 
         gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
+        gameObject.transform.eulerAngles = new Vector3(0f, rotation, 0f);
         return currPosition;
     }
     float[] GetRelevantQValues(int qTableIdx, float[,] qTable, float[] qValues, List<string> validMoves, List<string> potentialMoves)

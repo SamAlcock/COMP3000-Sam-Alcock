@@ -188,7 +188,7 @@ public class AgentSARSA : MonoBehaviour
         qValues = GetRelevantQValues(qTableIdx, qTable, qValues, validMoves, potentialMoves);
         float bestQValue = qValues.Max();
         int bestIdx = -1;
-
+        int rotation = 0;
         int random = UnityEngine.Random.Range(0, 100);
         if (random == 0) // Exploration
         {
@@ -208,18 +208,22 @@ public class AgentSARSA : MonoBehaviour
             if (bestIdx == 0) // Left
             {
                 currPosition[0]--;
+                rotation = -90;
             }
             else if (bestIdx == 1) // Right
             {
                 currPosition[0]++;
+                rotation = 90;
             }
             else if (bestIdx == 2) // Up
             {
                 currPosition[1]++;
+                rotation = 0;
             }
             else if (bestIdx == 3) // Down
             {
                 currPosition[1]--;
+                rotation = 180;
             }
         }
       
@@ -227,21 +231,25 @@ public class AgentSARSA : MonoBehaviour
         {
             currPosition[0]--;
             bestIdx = 0;
+            rotation = -90;
         }
         else if (prevAction == "RIGHT") // Right
         {
             currPosition[0]++;
             bestIdx = 1;
+            rotation = -90;
         }
         else if (prevAction == "UP") // Up
         {
             currPosition[1]++;
             bestIdx = 2;
+            rotation = 0;
         }
         else if (prevAction == "DOWN") // Down
         {
             currPosition[1]--;
             bestIdx = 3;
+            rotation = 180;
         }
 
         float gamma = 0.99f;
@@ -265,6 +273,7 @@ public class AgentSARSA : MonoBehaviour
         }
 
         gameObject.transform.position = new Vector3(grid[currPosition[0], currPosition[1]].x, 0.2f, grid[currPosition[0], currPosition[1]].z);
+        gameObject.transform.eulerAngles = new Vector3(0f, rotation, 0f);
         return (currPosition, prevAction);
     }
     float[] GetRelevantQValues(int qTableIdx, float[,] qTable, float[] qValues, List<string> validMoves, List<string> potentialMoves)
