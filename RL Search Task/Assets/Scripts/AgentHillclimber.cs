@@ -75,7 +75,7 @@ public class AgentHillclimber : MonoBehaviour
         return instructions;
     }
 
-    public List<int> SessionReplace(int numOfInstructions, List<int> parent) // Swap mutation?
+    public List<int> SessionReplace(int numOfInstructions, List<int> parent) // Swap mutation
     {
         System.Random rand = new();
 
@@ -181,7 +181,7 @@ public class AgentHillclimber : MonoBehaviour
         if (!validInstructions.Contains(instruction))
         {
             int newInstructionIdx = rand.Next(0, validInstructions.Count);
-            instruction = validInstructions[newInstructionIdx];
+            instruction = validInstructions[newInstructionIdx]; // sometimes throws outofrange error
             allInstructions[iteration] = instruction;
         }
 

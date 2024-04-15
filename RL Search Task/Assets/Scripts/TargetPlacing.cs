@@ -54,8 +54,9 @@ public class TargetPlacing : MonoBehaviour
     {
         GameObject[] startState = GameObject.FindGameObjectsWithTag("StartState");
        
-        if (Math.Sqrt((startState[0].transform.position.z - startState[0].transform.position.x) * (startState[0].transform.position.z - startState[0].transform.position.x) + (position.x - position.z) * (position.x - position.z)) < 5)
+        if (Math.Sqrt((startState[0].transform.position.x - position.x) * (startState[0].transform.position.x - position.x) + (startState[0].transform.position.z - position.z) * (startState[0].transform.position.z - position.z)) < 4)
         {
+            Debug.Log("Bad position, position = " + Math.Sqrt((startState[0].transform.position.x - position.x) * (startState[0].transform.position.x - position.x) + (startState[0].transform.position.z - position.z) * (startState[0].transform.position.z - position.z)));
             return true;
         }
 
