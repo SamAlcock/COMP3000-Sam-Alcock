@@ -189,7 +189,7 @@ public class AgentSARSA : MonoBehaviour
         float bestQValue = qValues.Max();
         int bestIdx = -1;
 
-        int random = UnityEngine.Random.Range(0, 20);
+        int random = UnityEngine.Random.Range(0, 100);
         if (random == 0) // Exploration
         {
             bestIdx = Explore(qValues);

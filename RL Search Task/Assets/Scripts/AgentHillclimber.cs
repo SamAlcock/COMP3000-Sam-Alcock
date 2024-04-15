@@ -81,7 +81,7 @@ public class AgentHillclimber : MonoBehaviour
 
         List<int> child = new List<int>(parent);
 
-        for (int i = 0; i < 1; i++) // May need to specify that it has to be a different swap
+        for (int i = 0; i < 2; i++) // May need to specify that it has to be a different swap
         {
             int location = rand.Next(0, child.Count);
 
